@@ -1,0 +1,7 @@
+__pycache__/
+.DS_Store
+.env
+
+# Local-only working files
+archive/
+CLAUDE.md

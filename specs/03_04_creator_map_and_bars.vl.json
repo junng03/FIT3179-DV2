@@ -1,0 +1,275 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Proportional symbol map of where Australia's top 30 YouTube creators are based (one circle per city, area = combined subscribers of creators based there), linked to a bar chart of the 15 largest channels. Click a city or a bar to highlight it in both views. Sources: YouTube Data API v3; Wikipedia/Wikidata and news sources for home cities; ABS-derived state boundaries.",
+  "data": {
+    "url": "data/creators.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "subscribers": "number",
+        "views": "number",
+        "videos": "number",
+        "lat": "number",
+        "lon": "number"
+      }
+    }
+  },
+  "params": [
+    {
+      "name": "pick",
+      "select": {
+        "type": "point",
+        "fields": [
+          "city"
+        ],
+        "on": "click",
+        "clear": "dblclick"
+      },
+      "views": [
+        "creator_dots",
+        "creator_bars"
+      ]
+    }
+  ],
+  "spacing": 40,
+  "hconcat": [
+    {
+      "width": 500,
+      "height": 430,
+      "projection": {
+        "type": "conicEqualArea",
+        "parallels": [
+          -18,
+          -36
+        ],
+        "rotate": [
+          -133,
+          0
+        ],
+        "center": [
+          0,
+          -27
+        ]
+      },
+      "layer": [
+        {
+          "data": {
+            "url": "https://cdn.jsdelivr.net/gh/rowanhogan/australian-states@master/states.geojson",
+            "format": {
+              "type": "json",
+              "property": "features"
+            }
+          },
+          "mark": {
+            "type": "geoshape",
+            "fill": "#f0efec",
+            "stroke": "#c3c2b7",
+            "strokeWidth": 0.8
+          }
+        },
+        {
+          "name": "creator_dots",
+          "transform": [
+            {
+              "filter": "isValid(datum.lat) && isValid(datum.lon)"
+            },
+            {
+              "aggregate": [
+                {
+                  "op": "sum",
+                  "field": "subscribers",
+                  "as": "total_subs"
+                },
+                {
+                  "op": "count",
+                  "as": "n"
+                },
+                {
+                  "op": "values",
+                  "as": "vals"
+                }
+              ],
+              "groupby": [
+                "city",
+                "lat",
+                "lon"
+              ]
+            },
+            {
+              "calculate": "join(pluck(datum.vals, 'channel'), ', ')",
+              "as": "names"
+            }
+          ],
+          "mark": {
+            "type": "circle",
+            "stroke": "#fcfcfb",
+            "strokeWidth": 1.5,
+            "cursor": "pointer"
+          },
+          "encoding": {
+            "longitude": {
+              "field": "lon",
+              "type": "quantitative"
+            },
+            "latitude": {
+              "field": "lat",
+              "type": "quantitative"
+            },
+            "size": {
+              "field": "total_subs",
+              "type": "quantitative",
+              "title": "Combined subscribers",
+              "scale": {
+                "range": [
+                  60,
+                  2200
+                ]
+              },
+              "legend": {
+                "values": [
+                  2000000,
+                  10000000,
+                  20000000
+                ],
+                "format": "~s",
+                "orient": "bottom",
+                "symbolFillColor": "#2a78d6",
+                "symbolOpacity": 0.6,
+                "symbolStrokeWidth": 0,
+                "labelExpr": "replace(datum.label, 'G', 'B')",
+                "direction": "horizontal"
+              }
+            },
+            "color": {
+              "condition": {
+                "param": "pick",
+                "empty": false,
+                "value": "#eb6834"
+              },
+              "value": "#2a78d6"
+            },
+            "opacity": {
+              "value": 0.8
+            },
+            "order": {
+              "field": "total_subs",
+              "sort": "descending"
+            },
+            "tooltip": [
+              {
+                "field": "city",
+                "title": "Based in"
+              },
+              {
+                "field": "n",
+                "title": "Creators"
+              },
+              {
+                "field": "names",
+                "title": "Channels"
+              },
+              {
+                "field": "total_subs",
+                "title": "Combined subscribers",
+                "format": ","
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "creator_bars",
+      "width": 300,
+      "height": 430,
+      "transform": [
+        {
+          "window": [
+            {
+              "op": "row_number",
+              "as": "rank"
+            }
+          ],
+          "sort": [
+            {
+              "field": "subscribers",
+              "order": "descending"
+            }
+          ]
+        },
+        {
+          "filter": "datum.rank <= 15"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 4,
+        "cursor": "pointer"
+      },
+      "encoding": {
+        "y": {
+          "field": "channel",
+          "type": "nominal",
+          "sort": "-x",
+          "title": null,
+          "axis": {
+            "ticks": false,
+            "domain": false
+          }
+        },
+        "x": {
+          "field": "subscribers",
+          "type": "quantitative",
+          "title": "YouTube subscribers",
+          "axis": {
+            "format": "~s",
+            "tickCount": 4
+          }
+        },
+        "color": {
+          "condition": [
+            {
+              "param": "pick",
+              "empty": false,
+              "value": "#eb6834"
+            },
+            {
+              "test": "!isValid(datum.lat)",
+              "value": "#c3c2b7"
+            }
+          ],
+          "value": "#2a78d6"
+        },
+        "tooltip": [
+          {
+            "field": "channel",
+            "title": "Channel"
+          },
+          {
+            "field": "category",
+            "title": "Content"
+          },
+          {
+            "field": "city",
+            "title": "Based in"
+          },
+          {
+            "field": "subscribers",
+            "title": "Subscribers",
+            "format": ","
+          },
+          {
+            "field": "videos",
+            "title": "Videos",
+            "format": ","
+          },
+          {
+            "field": "views",
+            "title": "Total views",
+            "format": ","
+          }
+        ]
+      }
+    }
+  ]
+}

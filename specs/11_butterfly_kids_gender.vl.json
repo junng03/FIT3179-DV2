@@ -1,0 +1,68 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Butterfly (back-to-back bar) chart: share of boys and girls aged 6-13 who watch YouTube that watch each video category. Boys to the left in blue, girls to the right in orange. Categories sorted from most boy-leaning to most girl-leaning. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
+  "width": "container",
+  "height": 380,
+  "data": {
+    "url": "data/kids_category_by_gender.csv",
+    "format": { "type": "csv", "parse": { "boys": "number", "girls": "number" } }
+  },
+  "transform": [
+    { "calculate": "datum.girls - datum.boys", "as": "gap" },
+    { "fold": ["boys", "girls"], "as": ["gender", "pct"] },
+    { "calculate": "datum.gender === 'boys' ? 'Boys' : 'Girls'", "as": "gender_label" },
+    { "calculate": "datum.gender === 'boys' ? -datum.pct : datum.pct", "as": "signed" }
+  ],
+  "encoding": {
+    "y": {
+      "field": "category",
+      "type": "nominal",
+      "title": null,
+      "sort": { "field": "gap", "op": "mean", "order": "ascending" },
+      "axis": { "domain": false, "ticks": false, "labelFontSize": 13, "labelPadding": 8 }
+    },
+    "x": {
+      "field": "signed",
+      "type": "quantitative",
+      "title": "Share of boys / girls aged 6-13 who watch YouTube (%)",
+      "scale": { "domain": [-80, 80] },
+      "axis": { "labelExpr": "abs(datum.value)", "values": [-75, -50, -25, 0, 25, 50, 75], "gridColor": "#e1e0d9" }
+    }
+  },
+  "layer": [
+    {
+      "mark": { "type": "bar", "height": { "band": 0.7 }, "cornerRadiusEnd": 3 },
+      "encoding": {
+        "color": {
+          "field": "gender_label",
+          "type": "nominal",
+          "title": null,
+          "scale": { "domain": ["Boys", "Girls"], "range": ["#2a78d6", "#eb6834"] },
+          "legend": null
+        },
+        "tooltip": [
+          { "field": "category", "title": "Category" },
+          { "field": "gender_label", "title": "Group" },
+          { "field": "pct", "title": "Watch this category (%)", "format": ".0f" }
+        ]
+      }
+    },
+    {
+      "mark": { "type": "text", "fontSize": 12, "dx": { "expr": "datum.signed < 0 ? -6 : 6" }, "align": { "expr": "datum.signed < 0 ? 'right' : 'left'" } },
+      "encoding": {
+        "text": { "field": "pct", "type": "quantitative", "format": ".0f" },
+        "color": { "value": "#52514e" }
+      }
+    },
+    {
+      "data": { "values": [{ "x": -78, "label": "Boys" }, { "x": 78, "label": "Girls" }] },
+      "mark": { "type": "text", "fontSize": 14, "fontWeight": "bold", "baseline": "bottom", "dy": -6, "align": { "expr": "datum.x < 0 ? 'left' : 'right'" } },
+      "encoding": {
+        "x": { "field": "x", "type": "quantitative" },
+        "y": { "value": 0 },
+        "text": { "field": "label" },
+        "color": { "field": "label", "type": "nominal", "scale": { "domain": ["Boys", "Girls"], "range": ["#2a78d6", "#eb6834"] }, "legend": null }
+      }
+    }
+  ]
+}

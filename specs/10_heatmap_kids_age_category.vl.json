@@ -1,0 +1,172 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Heatmap: share of Australian children who watch YouTube that watch each of the five most popular video categories, for ages 6-9, ages 10-13 and all 6-13 year olds. Darker = larger share. Roy Morgan publishes only the top categories for each age group, so some cells are marked 'not published'; Gaming is the #1 category in every age group but its share by age is not published. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
+  "width": "container",
+  "height": 300,
+  "data": {
+    "url": "data/kids_age_category.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "pct": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "isValid(datum.pct) ? format(datum.pct, '.0f') + '%' : (indexof(datum.note, 'Top') === 0 ? '#1' : 'not published')",
+      "as": "label"
+    },
+    {
+      "calculate": "isValid(datum.pct) ? datum.pct + '%' : datum.note",
+      "as": "tooltip_value"
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "age_band",
+      "type": "ordinal",
+      "title": null,
+      "sort": [
+        "6-9",
+        "10-13",
+        "All 6-13"
+      ],
+      "axis": {
+        "orient": "top",
+        "labelAngle": 0,
+        "domain": false,
+        "ticks": false,
+        "labelFontSize": 13,
+        "labelFontWeight": "bold",
+        "labelExpr": "datum.value === 'All 6-13' ? 'All ages 6-13' : 'Ages ' + datum.value"
+      }
+    },
+    "y": {
+      "field": "category",
+      "type": "nominal",
+      "title": null,
+      "sort": [
+        "Gaming",
+        "Animation",
+        "Comedy",
+        "Animals",
+        "Challenges"
+      ],
+      "axis": {
+        "domain": false,
+        "ticks": false,
+        "labelFontSize": 13
+      }
+    }
+  },
+  "layer": [
+    {
+      "description": "Base layer: every cell in light grey, so 'not published' cells still show.",
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 3,
+        "fill": "#f0efec"
+      },
+      "encoding": {
+        "tooltip": [
+          {
+            "field": "age_band",
+            "title": "Age group"
+          },
+          {
+            "field": "category",
+            "title": "Category"
+          },
+          {
+            "field": "tooltip_value",
+            "title": "Watch this category"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 3
+      },
+      "encoding": {
+        "color": {
+          "field": "pct",
+          "type": "quantitative",
+          "title": "% of YouTube-watching children in that age group",
+          "scale": {
+            "domain": [
+              0,
+              60
+            ],
+            "range": [
+              "#cde2fb",
+              "#0d366b"
+            ]
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "gradientLength": 220,
+            "titleLimit": 340
+          }
+        },
+        "tooltip": [
+          {
+            "field": "age_band",
+            "title": "Age group"
+          },
+          {
+            "field": "category",
+            "title": "Category"
+          },
+          {
+            "field": "tooltip_value",
+            "title": "Watch this category"
+          }
+        ]
+      },
+      "transform": [
+        {
+          "filter": "isValid(datum.pct)"
+        }
+      ]
+    },
+    {
+      "mark": {
+        "type": "text",
+        "fontSize": 13
+      },
+      "encoding": {
+        "text": {
+          "field": "label"
+        },
+        "color": {
+          "condition": [
+            {
+              "test": "!isValid(datum.pct)",
+              "value": "#898781"
+            },
+            {
+              "test": "datum.pct >= 38",
+              "value": "#ffffff"
+            }
+          ],
+          "value": "#0b0b0b"
+        },
+        "fontWeight": {
+          "condition": {
+            "test": "datum.label === '#1'",
+            "value": "bold"
+          },
+          "value": "normal"
+        }
+      }
+    }
+  ]
+}

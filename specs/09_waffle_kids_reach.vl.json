@@ -1,0 +1,37 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Waffle chart (10 x 10): of every 100 Australian children aged 6-13, 89 watch YouTube (about 2.5 million). Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129.",
+  "width": 300,
+  "height": 300,
+  "data": {
+    "url": "data/kids_youtube_reach.csv",
+    "format": { "type": "csv", "parse": { "order": "number", "pct": "number" } }
+  },
+  "transform": [
+    { "calculate": "sequence(0, datum.pct)", "as": "unit" },
+    { "flatten": ["unit"] },
+    {
+      "window": [{ "op": "row_number", "as": "i" }],
+      "sort": [{ "field": "order", "order": "descending" }, { "field": "unit", "order": "ascending" }]
+    },
+    { "calculate": "(datum.i - 1) % 10", "as": "col" },
+    { "calculate": "floor((datum.i - 1) / 10)", "as": "row" }
+  ],
+  "mark": { "type": "square", "size": 520, "opacity": 1, "cornerRadius": 2 },
+  "encoding": {
+    "x": { "field": "col", "type": "ordinal", "axis": null },
+    "y": { "field": "row", "type": "ordinal", "axis": null },
+    "color": {
+      "field": "group",
+      "type": "nominal",
+      "title": null,
+      "sort": ["Watch YouTube", "Don't watch YouTube"],
+      "scale": { "domain": ["Watch YouTube", "Don't watch YouTube"], "range": ["#2a78d6", "#c3c2b7"] },
+      "legend": { "orient": "bottom", "direction": "horizontal", "symbolType": "square" }
+    },
+    "tooltip": [
+      { "field": "group", "title": "Children aged 6-13" },
+      { "field": "pct", "title": "Out of every 100" }
+    ]
+  }
+}

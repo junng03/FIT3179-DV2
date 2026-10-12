@@ -1,0 +1,167 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the past 7 days, 2024 vs 2025. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
+  "width": "container",
+  "height": 300,
+  "data": {
+    "url": "data/acma_ugc_by_age.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "year": "number",
+        "pct": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "toString(datum.year)",
+      "as": "year_label"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "age_group",
+      "type": "ordinal",
+      "title": null,
+      "sort": [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55-64",
+        "65-74",
+        "75+"
+      ],
+      "axis": {
+        "domain": false,
+        "ticks": false,
+        "labelFontSize": 13,
+        "labelPadding": 8
+      }
+    },
+    "x": {
+      "field": "pct",
+      "type": "quantitative",
+      "title": "Adults who watched in the past 7 days (%)",
+      "scale": {
+        "domain": [
+          0,
+          100
+        ]
+      },
+      "axis": {
+        "tickCount": 5,
+        "gridColor": "#e1e0d9"
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "color": "#c3c2b7",
+        "strokeWidth": 3
+      },
+      "encoding": {
+        "x": {
+          "aggregate": "min",
+          "field": "pct",
+          "type": "quantitative"
+        },
+        "x2": {
+          "aggregate": "max",
+          "field": "pct"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "size": 170,
+        "opacity": 1,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 1.5
+      },
+      "encoding": {
+        "color": {
+          "field": "year_label",
+          "type": "nominal",
+          "title": null,
+          "scale": {
+            "domain": [
+              "2024",
+              "2025"
+            ],
+            "range": [
+              "#c3c2b7",
+              "#eb6834"
+            ]
+          },
+          "legend": {
+            "orient": "top",
+            "direction": "horizontal"
+          }
+        },
+        "tooltip": [
+          {
+            "field": "age_group",
+            "title": "Age group"
+          },
+          {
+            "field": "year_label",
+            "title": "Year"
+          },
+          {
+            "field": "pct",
+            "title": "Watched in past 7 days (%)",
+            "format": ".0f"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.year === 2025"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "right",
+        "dx": -12,
+        "fontSize": 12,
+        "color": "#eb6834",
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "text": {
+          "field": "pct",
+          "type": "quantitative",
+          "format": ".0f"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.year === 2024"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 12,
+        "fontSize": 12,
+        "color": "#898781"
+      },
+      "encoding": {
+        "text": {
+          "field": "pct",
+          "type": "quantitative",
+          "format": ".0f"
+        }
+      }
+    }
+  ]
+}

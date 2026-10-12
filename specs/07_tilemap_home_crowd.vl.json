@@ -1,0 +1,205 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Tile grid map as small multiples: relative YouTube search interest in four Australian creators by state and territory over the past 12 months. One equal-sized square per state, so the ACT is as visible as WA. 100 = the state where that creator's share of searches was highest. Source: Google Trends (YouTube Search), exported by the author. Grey tiles: too little search volume for Google to score.",
+  "data": {
+    "url": "data/trends_state.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "interest": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "lookup": "state",
+      "from": {
+        "data": {
+          "url": "data/state_tiles.csv",
+          "format": {
+            "type": "csv",
+            "parse": {
+              "col": "number",
+              "row": "number"
+            }
+          }
+        },
+        "key": "state",
+        "fields": [
+          "abbr",
+          "col",
+          "row"
+        ]
+      }
+    },
+    {
+      "calculate": "toNumber(datum.col)",
+      "as": "tile_x"
+    },
+    {
+      "calculate": "toNumber(datum.row)",
+      "as": "tile_y"
+    },
+    {
+      "calculate": "isValid(datum.interest) ? datum.interest : datum.note",
+      "as": "tooltip_value"
+    }
+  ],
+  "facet": {
+    "field": "creator",
+    "type": "nominal",
+    "title": null,
+    "header": {
+      "labelFontSize": 14,
+      "labelFontWeight": "bold",
+      "labelColor": "#0b0b0b",
+      "labelOrient": "top"
+    },
+    "sort": [
+      "How Ridiculous",
+      "LazarBeam",
+      "Lachlan",
+      "Bridey Drake"
+    ]
+  },
+  "columns": 2,
+  "spacing": {
+    "row": 24,
+    "column": 40
+  },
+  "spec": {
+    "width": 200,
+    "height": 200,
+    "layer": [
+      {
+        "description": "Base layer: every tile in light grey, so states with too little search volume still show.",
+        "mark": {
+          "type": "rect",
+          "cornerRadius": 3,
+          "stroke": "#fcfcfb",
+          "strokeWidth": 3,
+          "fill": "#f0efec"
+        },
+        "encoding": {
+          "tooltip": [
+            {
+              "field": "creator",
+              "title": "Creator"
+            },
+            {
+              "field": "state",
+              "title": "State or territory"
+            },
+            {
+              "field": "tooltip_value",
+              "title": "Relative search interest (0-100)"
+            }
+          ]
+        }
+      },
+      {
+        "mark": {
+          "type": "rect",
+          "cornerRadius": 3,
+          "stroke": "#fcfcfb",
+          "strokeWidth": 3
+        },
+        "encoding": {
+          "color": {
+            "field": "interest",
+            "type": "quantitative",
+            "title": "Relative search interest (100 = highest state)",
+            "scale": {
+              "domain": [
+                0,
+                100
+              ],
+              "range": [
+                "#cde2fb",
+                "#0d366b"
+              ]
+            },
+            "legend": {
+              "orient": "bottom",
+              "direction": "horizontal",
+              "gradientLength": 220,
+              "titleLimit": 320
+            }
+          },
+          "tooltip": [
+            {
+              "field": "creator",
+              "title": "Creator"
+            },
+            {
+              "field": "state",
+              "title": "State or territory"
+            },
+            {
+              "field": "tooltip_value",
+              "title": "Relative search interest (0-100)"
+            }
+          ]
+        },
+        "transform": [
+          {
+            "filter": "isValid(datum.interest)"
+          }
+        ]
+      },
+      {
+        "mark": {
+          "type": "text",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        "encoding": {
+          "text": {
+            "field": "abbr"
+          },
+          "color": {
+            "condition": [
+              {
+                "test": "!isValid(datum.interest)",
+                "value": "#898781"
+              },
+              {
+                "test": "datum.interest >= 55",
+                "value": "#ffffff"
+              }
+            ],
+            "value": "#0b0b0b"
+          }
+        }
+      }
+    ],
+    "encoding": {
+      "x": {
+        "field": "tile_x",
+        "type": "ordinal",
+        "axis": null,
+        "scale": {
+          "domain": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "y": {
+        "field": "tile_y",
+        "type": "ordinal",
+        "axis": null,
+        "scale": {
+          "domain": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    }
+  }
+}

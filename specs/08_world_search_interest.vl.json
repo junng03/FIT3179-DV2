@@ -1,0 +1,141 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "World choropleth (Equal Earth projection): where in the world people search YouTube for each Australian creator, past 12 months. Use the dropdown to switch creator. 100 = the country where that creator's share of searches was highest. Australia outlined in orange. Source: Google Trends (YouTube Search), exported by the author; country boundaries: Natural Earth via vega-datasets. NOTE: the dropdown options must match the creator names in data/trends_world.csv.",
+  "width": "container",
+  "height": 420,
+  "projection": {
+    "type": "equalEarth"
+  },
+  "params": [
+    {
+      "name": "creator_pick",
+      "value": "How Ridiculous",
+      "bind": {
+        "input": "select",
+        "options": [
+          "How Ridiculous",
+          "LazarBeam",
+          "Lachlan",
+          "Bridey Drake"
+        ],
+        "name": "Creator: "
+      }
+    }
+  ],
+  "data": {
+    "url": "https://cdn.jsdelivr.net/npm/vega-datasets@2.8.0/data/world-110m.json",
+    "format": {
+      "type": "topojson",
+      "feature": "countries"
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum.id != 10"
+    }
+  ],
+  "layer": [
+    {
+      "description": "Base layer: every country in grey (no data or too little search volume).",
+      "mark": {
+        "type": "geoshape",
+        "fill": "#e1e0d9",
+        "stroke": "#fcfcfb",
+        "strokeWidth": 0.5
+      }
+    },
+    {
+      "data": {
+        "url": "data/trends_world.csv",
+        "format": {
+          "type": "csv",
+          "parse": {
+            "iso_n3": "number",
+            "interest": "number"
+          }
+        }
+      },
+      "transform": [
+        {
+          "filter": "datum.creator === creator_pick && isValid(datum.interest) && datum.interest > 0"
+        },
+        {
+          "lookup": "iso_n3",
+          "from": {
+            "data": {
+              "url": "https://cdn.jsdelivr.net/npm/vega-datasets@2.8.0/data/world-110m.json",
+              "format": {
+                "type": "topojson",
+                "feature": "countries"
+              }
+            },
+            "key": "id"
+          },
+          "as": "geo"
+        },
+        {
+          "filter": "isValid(datum.geo)"
+        }
+      ],
+      "mark": {
+        "type": "geoshape",
+        "stroke": "#fcfcfb",
+        "strokeWidth": 0.5
+      },
+      "encoding": {
+        "shape": {
+          "field": "geo",
+          "type": "geojson"
+        },
+        "color": {
+          "field": "interest",
+          "type": "quantitative",
+          "title": "Relative search interest (100 = highest country)",
+          "scale": {
+            "domain": [
+              0,
+              100
+            ],
+            "range": [
+              "#cde2fb",
+              "#0d366b"
+            ]
+          },
+          "legend": {
+            "orient": "bottom-left",
+            "direction": "horizontal",
+            "gradientLength": 200,
+            "titleLimit": 320
+          }
+        },
+        "tooltip": [
+          {
+            "field": "country",
+            "title": "Country"
+          },
+          {
+            "field": "creator",
+            "title": "Creator"
+          },
+          {
+            "field": "interest",
+            "title": "Relative search interest (0-100)"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.id == 36"
+        }
+      ],
+      "mark": {
+        "type": "geoshape",
+        "fillOpacity": 0,
+        "stroke": "#eb6834",
+        "strokeWidth": 2.5
+      }
+    }
+  ]
+}

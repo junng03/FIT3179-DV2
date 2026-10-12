@@ -1,0 +1,86 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Bump chart: rank of the eight most-used online video services among Australian adults (used in the past 7 days), 2020-2025. YouTube highlighted orange. Source: ACMA, How we watch and listen to content (2026), data tables QF8.",
+  "width": "container",
+  "height": 340,
+  "padding": { "right": 130 },
+  "data": {
+    "url": "data/acma_services_by_year.csv",
+    "format": { "type": "csv", "parse": { "year": "number", "pct": "number" } }
+  },
+  "transform": [
+    {
+      "window": [{ "op": "rank", "as": "rank" }],
+      "sort": [{ "field": "pct", "order": "descending" }],
+      "groupby": ["year"]
+    },
+    { "joinaggregate": [{ "op": "max", "field": "year", "as": "last_year" }] }
+  ],
+  "encoding": {
+    "x": {
+      "field": "year",
+      "type": "ordinal",
+      "title": null,
+      "axis": { "labelAngle": 0, "grid": false }
+    },
+    "y": {
+      "field": "rank",
+      "type": "quantitative",
+      "title": "Rank (1 = most used)",
+      "scale": { "reverse": true, "domainMin": 1, "nice": false, "zero": false },
+      "axis": { "tickMinStep": 1, "format": "d", "grid": false }
+    },
+    "detail": { "field": "service" }
+  },
+  "layer": [
+    {
+      "params": [
+        {
+          "name": "hover",
+          "select": { "type": "point", "fields": ["service"], "on": "pointerover", "clear": "pointerout" }
+        }
+      ],
+      "mark": { "type": "line", "interpolate": "monotone", "strokeCap": "round" },
+      "encoding": {
+        "color": {
+          "condition": { "test": "datum.service === 'YouTube'", "value": "#eb6834" },
+          "value": "#c3c2b7"
+        },
+        "strokeWidth": {
+          "condition": { "param": "hover", "empty": false, "value": 4 },
+          "value": 2
+        }
+      }
+    },
+    {
+      "mark": { "type": "point", "filled": true, "size": 80, "stroke": "#fcfcfb", "strokeWidth": 2 },
+      "encoding": {
+        "color": {
+          "condition": { "test": "datum.service === 'YouTube'", "value": "#eb6834" },
+          "value": "#a8a79f"
+        },
+        "tooltip": [
+          { "field": "service", "title": "Service" },
+          { "field": "year", "title": "Year" },
+          { "field": "pct", "title": "Adults using it (%)", "format": ".0f" },
+          { "field": "rank", "title": "Rank" }
+        ]
+      }
+    },
+    {
+      "transform": [{ "filter": "datum.year === datum.last_year" }],
+      "mark": { "type": "text", "align": "left", "dx": 10, "fontSize": 12 },
+      "encoding": {
+        "text": { "field": "service" },
+        "color": {
+          "condition": { "test": "datum.service === 'YouTube'", "value": "#a8431b" },
+          "value": "#52514e"
+        },
+        "fontWeight": {
+          "condition": { "test": "datum.service === 'YouTube'", "value": "bold" },
+          "value": "normal"
+        }
+      }
+    }
+  ]
+}
