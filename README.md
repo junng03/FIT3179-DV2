@@ -2,7 +2,7 @@
 
 A data story about Australian content creators, built with Vega-Lite for FIT3179 Data Visualisation 2 (Monash, Semester 2 2026).
 
-**Live page:** `https://<your-username>.github.io/<repo-name>/` (fill in after deploying)
+**Live page:** https://junng03.github.io/FIT3179-DV2/
 
 ## Project structure
 
