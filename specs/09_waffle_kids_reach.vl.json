@@ -1,37 +1,166 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Waffle chart (10 x 10): of every 100 Australian children aged 6-13, 89 watch YouTube (about 2.5 million). Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129.",
+  "description": "Waffle chart (10 x 10): out of every 100 Australian children, how many watch YouTube. A switch shows all 6-13 year olds (89), ages 6-7 (84) or ages 8-13 (91). Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129.",
   "width": 300,
   "height": 300,
+  "padding": {
+    "top": 30
+  },
+  "params": [
+    {
+      "name": "age_pick",
+      "value": "All 6-13",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "All 6-13",
+          "6-7",
+          "8-13"
+        ],
+        "labels": [
+          "All ages 6–13",
+          "Ages 6–7",
+          "Ages 8–13"
+        ],
+        "name": "Age group: "
+      }
+    }
+  ],
   "data": {
     "url": "data/kids_youtube_reach.csv",
-    "format": { "type": "csv", "parse": { "order": "number", "pct": "number" } }
+    "format": {
+      "type": "csv",
+      "parse": {
+        "order": "number",
+        "pct": "number"
+      }
+    }
   },
   "transform": [
-    { "calculate": "sequence(0, datum.pct)", "as": "unit" },
-    { "flatten": ["unit"] },
     {
-      "window": [{ "op": "row_number", "as": "i" }],
-      "sort": [{ "field": "order", "order": "descending" }, { "field": "unit", "order": "ascending" }]
+      "filter": "datum.age_group === age_pick"
     },
-    { "calculate": "(datum.i - 1) % 10", "as": "col" },
-    { "calculate": "floor((datum.i - 1) / 10)", "as": "row" }
+    {
+      "calculate": "sequence(0, datum.pct)",
+      "as": "unit"
+    },
+    {
+      "flatten": [
+        "unit"
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "row_number",
+          "as": "i"
+        }
+      ],
+      "sort": [
+        {
+          "field": "order",
+          "order": "descending"
+        },
+        {
+          "field": "unit",
+          "order": "ascending"
+        }
+      ]
+    },
+    {
+      "calculate": "(datum.i - 1) % 10",
+      "as": "col"
+    },
+    {
+      "calculate": "floor((datum.i - 1) / 10)",
+      "as": "row"
+    },
+    {
+      "calculate": "datum.pct + ' of every 100 children ' + (age_pick === 'All 6-13' ? 'aged 6–13' : age_pick === '6-7' ? 'aged 6–7' : 'aged 8–13')",
+      "as": "headline"
+    }
   ],
-  "mark": { "type": "square", "size": 520, "opacity": 1, "cornerRadius": 2 },
-  "encoding": {
-    "x": { "field": "col", "type": "ordinal", "axis": null },
-    "y": { "field": "row", "type": "ordinal", "axis": null },
-    "color": {
-      "field": "group",
-      "type": "nominal",
-      "title": null,
-      "sort": ["Watch YouTube", "Don't watch YouTube"],
-      "scale": { "domain": ["Watch YouTube", "Don't watch YouTube"], "range": ["#2a78d6", "#c3c2b7"] },
-      "legend": { "orient": "bottom", "direction": "horizontal", "symbolType": "square" }
+  "layer": [
+    {
+      "mark": {
+        "type": "square",
+        "size": 520,
+        "opacity": 1,
+        "cornerRadius": 2
+      },
+      "encoding": {
+        "x": {
+          "field": "col",
+          "type": "ordinal",
+          "axis": null
+        },
+        "y": {
+          "field": "row",
+          "type": "ordinal",
+          "axis": null
+        },
+        "color": {
+          "field": "group",
+          "type": "nominal",
+          "title": null,
+          "sort": [
+            "Watch YouTube",
+            "Don't watch YouTube"
+          ],
+          "scale": {
+            "domain": [
+              "Watch YouTube",
+              "Don't watch YouTube"
+            ],
+            "range": [
+              "#2a78d6",
+              "#aeada5"
+            ]
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "symbolType": "square"
+          }
+        },
+        "tooltip": [
+          {
+            "field": "group",
+            "title": "Children"
+          },
+          {
+            "field": "pct",
+            "title": "Out of every 100"
+          }
+        ]
+      }
     },
-    "tooltip": [
-      { "field": "group", "title": "Children aged 6-13" },
-      { "field": "pct", "title": "Out of every 100" }
-    ]
-  }
+    {
+      "description": "Headline above the grid, read from the data so it follows the switch.",
+      "transform": [
+        {
+          "filter": "datum.group === 'Watch YouTube' && datum.unit === 0"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "bottom",
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "color": "#0b0b0b"
+      },
+      "encoding": {
+        "x": {
+          "value": 0
+        },
+        "y": {
+          "value": -12
+        },
+        "text": {
+          "field": "headline"
+        }
+      }
+    }
+  ]
 }

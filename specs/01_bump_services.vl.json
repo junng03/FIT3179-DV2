@@ -1,84 +1,240 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Bump chart: rank of the eight most-used online video services among Australian adults (used in the past 7 days), 2020-2025. YouTube highlighted orange. Source: ACMA, How we watch and listen to content (2026), data tables QF8.",
+  "description": "Bump chart: rank of the eight most-used online video services among Australian adults (used in the past 7 days), 2020-2025. The highlighted service (YouTube by default, or the one picked in the menu) is orange. A switch shows the share of adults instead of the rank. Source: ACMA, How we watch and listen to content (2026), data tables QF8.",
   "width": "container",
   "height": 340,
-  "padding": { "right": 130 },
+  "padding": {
+    "right": 130
+  },
+  "params": [
+    {
+      "name": "focus_service",
+      "value": "YouTube",
+      "bind": {
+        "input": "select",
+        "options": [
+          "YouTube",
+          "Netflix",
+          "Facebook",
+          "Instagram Reels",
+          "Disney+",
+          "Prime Video",
+          "TikTok",
+          "Stan"
+        ],
+        "name": "Highlight: "
+      }
+    },
+    {
+      "name": "measure",
+      "value": "Rank",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "Rank",
+          "Share of adults"
+        ],
+        "name": "Show: "
+      }
+    }
+  ],
   "data": {
     "url": "data/acma_services_by_year.csv",
-    "format": { "type": "csv", "parse": { "year": "number", "pct": "number" } }
+    "format": {
+      "type": "csv",
+      "parse": {
+        "year": "number",
+        "pct": "number"
+      }
+    }
   },
   "transform": [
     {
-      "window": [{ "op": "rank", "as": "rank" }],
-      "sort": [{ "field": "pct", "order": "descending" }],
-      "groupby": ["year"]
+      "window": [
+        {
+          "op": "rank",
+          "as": "rank"
+        }
+      ],
+      "sort": [
+        {
+          "field": "pct",
+          "order": "descending"
+        }
+      ],
+      "groupby": [
+        "year"
+      ]
     },
-    { "joinaggregate": [{ "op": "max", "field": "year", "as": "last_year" }] }
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "year",
+          "as": "last_year"
+        }
+      ]
+    },
+    {
+      "calculate": "measure === 'Rank' ? datum.rank : datum.pct",
+      "as": "y_value"
+    }
   ],
   "encoding": {
     "x": {
       "field": "year",
       "type": "ordinal",
       "title": null,
-      "axis": { "labelAngle": 0, "grid": false }
+      "axis": {
+        "labelAngle": 0,
+        "grid": false
+      }
     },
     "y": {
-      "field": "rank",
+      "field": "y_value",
       "type": "quantitative",
-      "title": "Rank (1 = most used)",
-      "scale": { "reverse": true, "domainMin": 1, "nice": false, "zero": false },
-      "axis": { "tickMinStep": 1, "format": "d", "grid": false }
+      "scale": {
+        "reverse": {
+          "expr": "measure === 'Rank'"
+        },
+        "zero": false,
+        "nice": false
+      },
+      "axis": {
+        "title": {
+          "expr": "measure === 'Rank' ? 'Rank (1 = most used)' : 'Adults who used it in the past week (%)'"
+        },
+        "tickMinStep": 1,
+        "format": "d",
+        "grid": false,
+        "minExtent": 30
+      }
     },
-    "detail": { "field": "service" }
+    "detail": {
+      "field": "service"
+    }
   },
   "layer": [
     {
       "params": [
         {
           "name": "hover",
-          "select": { "type": "point", "fields": ["service"], "on": "pointerover", "clear": "pointerout" }
+          "select": {
+            "type": "point",
+            "fields": [
+              "service"
+            ],
+            "on": "pointerover",
+            "clear": "pointerout"
+          }
         }
       ],
-      "mark": { "type": "line", "interpolate": "monotone", "strokeCap": "round" },
+      "mark": {
+        "type": "line",
+        "interpolate": "monotone",
+        "strokeCap": "round",
+        "cursor": "pointer"
+      },
       "encoding": {
         "color": {
-          "condition": { "test": "datum.service === 'YouTube'", "value": "#eb6834" },
+          "condition": {
+            "test": "datum.service === focus_service",
+            "value": "#eb6834"
+          },
           "value": "#c3c2b7"
         },
         "strokeWidth": {
-          "condition": { "param": "hover", "empty": false, "value": 4 },
+          "condition": [
+            {
+              "param": "hover",
+              "empty": false,
+              "value": 4.5
+            },
+            {
+              "test": "datum.service === focus_service",
+              "value": 3.5
+            }
+          ],
           "value": 2
         }
       }
     },
     {
-      "mark": { "type": "point", "filled": true, "size": 80, "stroke": "#fcfcfb", "strokeWidth": 2 },
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "size": 80,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 2,
+        "opacity": 1
+      },
       "encoding": {
         "color": {
-          "condition": { "test": "datum.service === 'YouTube'", "value": "#eb6834" },
-          "value": "#a8a79f"
+          "condition": {
+            "test": "datum.service === focus_service",
+            "value": "#eb6834"
+          },
+          "value": "#aeada5"
         },
         "tooltip": [
-          { "field": "service", "title": "Service" },
-          { "field": "year", "title": "Year" },
-          { "field": "pct", "title": "Adults using it (%)", "format": ".0f" },
-          { "field": "rank", "title": "Rank" }
+          {
+            "field": "service",
+            "title": "Service"
+          },
+          {
+            "field": "year",
+            "title": "Year"
+          },
+          {
+            "field": "pct",
+            "title": "Adults using it in the past week (%)",
+            "format": ".0f"
+          },
+          {
+            "field": "rank",
+            "title": "Rank that year"
+          }
         ]
       }
     },
     {
-      "transform": [{ "filter": "datum.year === datum.last_year" }],
-      "mark": { "type": "text", "align": "left", "dx": 10, "fontSize": 12 },
+      "transform": [
+        {
+          "filter": "datum.year === datum.last_year && datum.service !== focus_service"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10
+      },
       "encoding": {
-        "text": { "field": "service" },
-        "color": {
-          "condition": { "test": "datum.service === 'YouTube'", "value": "#a8431b" },
-          "value": "#52514e"
+        "text": {
+          "field": "service"
         },
-        "fontWeight": {
-          "condition": { "test": "datum.service === 'YouTube'", "value": "bold" },
-          "value": "normal"
+        "color": {
+          "value": "#52514e"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.year === datum.last_year && datum.service === focus_service"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "text": {
+          "field": "service"
+        },
+        "color": {
+          "value": "#a8431b"
         }
       }
     }

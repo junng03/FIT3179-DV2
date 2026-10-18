@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Tile grid map as small multiples: relative YouTube search interest in four Australian creators by state and territory over the past 12 months. One equal-sized square per state, so the ACT is as visible as WA. 100 = the state where that creator's share of searches was highest. Source: Google Trends (YouTube Search), exported by the author. Grey tiles: too little search volume for Google to score.",
+  "description": "Tile grid map as small multiples: relative YouTube search interest in four Australian creators by state and territory over the past 12 months. One equal-sized square per state, so the ACT is as visible as WA. 100 = the state where that creator's share of searches was highest. Hovering a state outlines it in orange in all four maps. Source: Google Trends (YouTube Search), retrieved by the author with scripts/fetch_trends.py. Grey tiles: too little search volume for Google to score.",
   "data": {
     "url": "data/trends_state.csv",
     "format": {
@@ -50,9 +50,6 @@
     "type": "nominal",
     "title": null,
     "header": {
-      "labelFontSize": 14,
-      "labelFontWeight": "bold",
-      "labelColor": "#0b0b0b",
       "labelOrient": "top"
     },
     "sort": [
@@ -76,9 +73,9 @@
         "mark": {
           "type": "rect",
           "cornerRadius": 3,
-          "stroke": "#fcfcfb",
           "strokeWidth": 3,
-          "fill": "#f0efec"
+          "fill": "#e8e7e1",
+          "cursor": "pointer"
         },
         "encoding": {
           "tooltip": [
@@ -94,15 +91,36 @@
               "field": "tooltip_value",
               "title": "Relative search interest (0-100)"
             }
-          ]
-        }
+          ],
+          "stroke": {
+            "condition": {
+              "param": "hover_state",
+              "empty": false,
+              "value": "#eb6834"
+            },
+            "value": "#fcfcfb"
+          }
+        },
+        "params": [
+          {
+            "name": "hover_state",
+            "select": {
+              "type": "point",
+              "fields": [
+                "state"
+              ],
+              "on": "pointerover",
+              "clear": "pointerout"
+            }
+          }
+        ]
       },
       {
         "mark": {
           "type": "rect",
           "cornerRadius": 3,
-          "stroke": "#fcfcfb",
-          "strokeWidth": 3
+          "strokeWidth": 3,
+          "cursor": "pointer"
         },
         "encoding": {
           "color": {
@@ -139,7 +157,15 @@
               "field": "tooltip_value",
               "title": "Relative search interest (0-100)"
             }
-          ]
+          ],
+          "stroke": {
+            "condition": {
+              "param": "hover_state",
+              "empty": false,
+              "value": "#eb6834"
+            },
+            "value": "#fcfcfb"
+          }
         },
         "transform": [
           {
@@ -150,7 +176,6 @@
       {
         "mark": {
           "type": "text",
-          "fontSize": 12,
           "fontWeight": "bold"
         },
         "encoding": {

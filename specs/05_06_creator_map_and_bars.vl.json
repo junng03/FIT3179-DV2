@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Proportional symbol map of where Australia's top 30 YouTube creators are based (one circle per city, area = combined subscribers of creators based there), linked to a bar chart of the 15 largest channels. Click a city or a bar to highlight it in both views. Sources: YouTube Data API v3; Wikipedia/Wikidata and news sources for home cities; ABS-derived state boundaries.",
+  "description": "Proportional symbol map of where Australia's top 40 YouTube creators are based (one circle per documented home city, area = combined subscribers, views or videos of the creators based there), linked to a bar chart of the 15 largest channels by the same measure. Click a city or a bar to highlight that city in both views; double-click to clear. Sources: YouTube Data API v3; Wikipedia/Wikidata and news sources for home cities; ABS-derived state boundaries.",
   "data": {
     "url": "data/creators.csv",
     "format": {
@@ -16,6 +16,24 @@
   },
   "params": [
     {
+      "name": "metric",
+      "value": "subscribers",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "subscribers",
+          "views",
+          "videos"
+        ],
+        "labels": [
+          "Subscribers",
+          "Total views",
+          "Videos uploaded"
+        ],
+        "name": "Measure: "
+      }
+    },
+    {
       "name": "pick",
       "select": {
         "type": "point",
@@ -29,6 +47,12 @@
         "creator_dots",
         "creator_bars"
       ]
+    }
+  ],
+  "transform": [
+    {
+      "calculate": "datum[metric]",
+      "as": "m"
     }
   ],
   "spacing": 40,
@@ -77,8 +101,18 @@
               "aggregate": [
                 {
                   "op": "sum",
+                  "field": "m",
+                  "as": "total_m"
+                },
+                {
+                  "op": "sum",
                   "field": "subscribers",
                   "as": "total_subs"
+                },
+                {
+                  "op": "sum",
+                  "field": "views",
+                  "as": "total_views"
                 },
                 {
                   "op": "count",
@@ -116,9 +150,9 @@
               "type": "quantitative"
             },
             "size": {
-              "field": "total_subs",
+              "field": "total_m",
               "type": "quantitative",
-              "title": "Combined subscribers",
+              "title": "City total, for the measure chosen above",
               "scale": {
                 "range": [
                   60,
@@ -126,18 +160,17 @@
                 ]
               },
               "legend": {
-                "values": [
-                  2000000,
-                  10000000,
-                  20000000
-                ],
                 "format": "~s",
                 "orient": "bottom",
+                "direction": "horizontal",
                 "symbolFillColor": "#2a78d6",
                 "symbolOpacity": 0.6,
                 "symbolStrokeWidth": 0,
                 "labelExpr": "replace(datum.label, 'G', 'B')",
-                "direction": "horizontal"
+                "titleLimit": 260,
+                "values": {
+                  "expr": "metric === 'views' ? [1e9, 5e9, 15e9] : metric === 'videos' ? [500, 2000, 4000] : [2e6, 10e6, 20e6]"
+                }
               }
             },
             "color": {
@@ -152,7 +185,7 @@
               "value": 0.8
             },
             "order": {
-              "field": "total_subs",
+              "field": "total_m",
               "sort": "descending"
             },
             "tooltip": [
@@ -171,6 +204,11 @@
               {
                 "field": "total_subs",
                 "title": "Combined subscribers",
+                "format": ","
+              },
+              {
+                "field": "total_views",
+                "title": "Combined views",
                 "format": ","
               }
             ]
@@ -192,7 +230,7 @@
           ],
           "sort": [
             {
-              "field": "subscribers",
+              "field": "m",
               "order": "descending"
             }
           ]
@@ -218,11 +256,14 @@
           }
         },
         "x": {
-          "field": "subscribers",
+          "field": "m",
           "type": "quantitative",
-          "title": "YouTube subscribers",
           "axis": {
+            "title": {
+              "expr": "metric === 'views' ? 'Total views' : metric === 'videos' ? 'Videos uploaded' : 'YouTube subscribers'"
+            },
             "format": "~s",
+            "labelExpr": "datum.value === 0 ? '0' : replace(datum.label, 'G', 'B')",
             "tickCount": 4
           }
         },
@@ -235,7 +276,7 @@
             },
             {
               "test": "!isValid(datum.lat)",
-              "value": "#c3c2b7"
+              "value": "#aeada5"
             }
           ],
           "value": "#2a78d6"
@@ -247,7 +288,7 @@
           },
           {
             "field": "category",
-            "title": "Content"
+            "title": "Main category"
           },
           {
             "field": "city",
@@ -259,13 +300,13 @@
             "format": ","
           },
           {
-            "field": "videos",
-            "title": "Videos",
+            "field": "views",
+            "title": "Total views",
             "format": ","
           },
           {
-            "field": "views",
-            "title": "Total views",
+            "field": "videos",
+            "title": "Videos uploaded",
             "format": ","
           }
         ]

@@ -11,7 +11,7 @@ Then, from the YouTube Data API v3:
   - drop hidden subscriber counts,
   - keep one channel per creator (their biggest),
   - keep the TOP_N creators by subscribers,
-  - read each creator's RECENT_N most recent uploads (length, category, made-for-kids flag).
+  - read each creator's RECENT_N most recent uploads (length, category, made-for-kids flag, views, likes).
 A channel's main category is the YouTube category used most often across those uploads (creators
 choose the category for each video). A video counts as a Short if it is 180 seconds or shorter,
 because the API has no Shorts flag and Shorts can be up to 3 minutes long.
@@ -91,6 +91,17 @@ def youtube(key, endpoint, params):
     return get_json(YT + endpoint, {**params, "key": key}, headers={})
 
 
+def video_stats(v):
+    """Views and likes for one videos.list item. A creator can hide the like count, so a
+    missing count is left blank rather than written as 0."""
+    st = v.get("statistics", {})
+    return {
+        "views": int(st["viewCount"]) if "viewCount" in st else "",
+        "likes": int(st["likeCount"]) if "likeCount" in st else "",
+        "stats_fetched": dt.date.today().isoformat(),
+    }
+
+
 def iso_duration_s(d):
     m = re.fullmatch(r"P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", d or "")
     if not m: return None
@@ -142,7 +153,7 @@ def main():
     for c in top:
         items = youtube(key, "playlistItems", {"part": "contentDetails", "playlistId": c["uploads"], "maxResults": RECENT_N}).get("items", [])
         vids = [it["contentDetails"]["videoId"] for it in items]
-        vs = youtube(key, "videos", {"part": "snippet,contentDetails,status", "id": ",".join(vids), "maxResults": 50}).get("items", []) if vids else []
+        vs = youtube(key, "videos", {"part": "snippet,contentDetails,status,statistics", "id": ",".join(vids), "maxResults": 50}).get("items", []) if vids else []
         rows = []
         for v in vs:
             dur = iso_duration_s(v["contentDetails"].get("duration"))
@@ -152,6 +163,7 @@ def main():
                 "channel": c["channel"], "video_id": v["id"], "published": v["snippet"]["publishedAt"][:10],
                 "duration_s": dur, "category": cat_names.get(v["snippet"].get("categoryId"), "Unknown"),
                 "made_for_kids": bool(v["status"].get("madeForKids")), "is_short": dur <= SHORT_MAX_S,
+                **video_stats(v),
             })
         c["n_recent"] = len(rows)
         c["main_category"] = Counter(r["category"] for r in rows).most_common(1)[0][0] if rows else ""

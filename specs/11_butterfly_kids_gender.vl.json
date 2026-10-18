@@ -1,67 +1,348 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Butterfly (back-to-back bar) chart: share of boys and girls aged 6-13 who watch YouTube that watch each video category. Boys to the left in blue, girls to the right in orange. Categories sorted from most boy-leaning to most girl-leaning. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
+  "description": "Butterfly (back-to-back bar) chart: share of boys and girls aged 6-13 who watch YouTube that watch each video category. Boys to the left in blue, girls to the right in amber. A switch changes the sort order; a second switch shows the difference (girls minus boys, in percentage points) as a single diverging bar per category. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
   "width": "container",
   "height": 380,
+  "params": [
+    {
+      "name": "view_mode",
+      "value": "Side by side",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "Side by side",
+          "Difference"
+        ],
+        "name": "Show: "
+      }
+    },
+    {
+      "name": "sort_by",
+      "value": "lean",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "lean",
+          "boys",
+          "girls"
+        ],
+        "labels": [
+          "Boy- to girl-leaning",
+          "Most watched by boys",
+          "Most watched by girls"
+        ],
+        "name": "Sort: "
+      }
+    }
+  ],
   "data": {
     "url": "data/kids_category_by_gender.csv",
-    "format": { "type": "csv", "parse": { "boys": "number", "girls": "number" } }
+    "format": {
+      "type": "csv",
+      "parse": {
+        "boys": "number",
+        "girls": "number"
+      }
+    }
   },
   "transform": [
-    { "calculate": "datum.girls - datum.boys", "as": "gap" },
-    { "fold": ["boys", "girls"], "as": ["gender", "pct"] },
-    { "calculate": "datum.gender === 'boys' ? 'Boys' : 'Girls'", "as": "gender_label" },
-    { "calculate": "datum.gender === 'boys' ? -datum.pct : datum.pct", "as": "signed" }
+    {
+      "calculate": "datum.girls - datum.boys",
+      "as": "gap"
+    },
+    {
+      "calculate": "sort_by === 'boys' ? -datum.boys : sort_by === 'girls' ? -datum.girls : datum.gap",
+      "as": "sort_key"
+    },
+    {
+      "window": [
+        {
+          "op": "dense_rank",
+          "as": "position"
+        }
+      ],
+      "sort": [
+        {
+          "field": "sort_key",
+          "order": "ascending"
+        },
+        {
+          "field": "category",
+          "order": "ascending"
+        }
+      ]
+    },
+    {
+      "calculate": "(datum.position < 10 ? '0' : '') + datum.position + '|' + datum.category",
+      "as": "y_key"
+    },
+    {
+      "fold": [
+        "boys",
+        "girls"
+      ],
+      "as": [
+        "gender",
+        "pct"
+      ]
+    },
+    {
+      "calculate": "datum.gender === 'boys' ? 'Boys' : 'Girls'",
+      "as": "gender_label"
+    },
+    {
+      "calculate": "datum.gender === 'boys' ? -datum.pct : datum.pct",
+      "as": "signed"
+    },
+    {
+      "calculate": "datum.gap > 0 ? 'Girls' : 'Boys'",
+      "as": "lean"
+    }
   ],
   "encoding": {
     "y": {
-      "field": "category",
+      "field": "y_key",
       "type": "nominal",
       "title": null,
-      "sort": { "field": "gap", "op": "mean", "order": "ascending" },
-      "axis": { "domain": false, "ticks": false, "labelFontSize": 13, "labelPadding": 8 }
-    },
-    "x": {
-      "field": "signed",
-      "type": "quantitative",
-      "title": "Share of boys / girls aged 6-13 who watch YouTube (%)",
-      "scale": { "domain": [-80, 80] },
-      "axis": { "labelExpr": "abs(datum.value)", "values": [-75, -50, -25, 0, 25, 50, 75], "gridColor": "#e1e0d9" }
+      "sort": "ascending",
+      "axis": {
+        "domain": false,
+        "ticks": false,
+        "labelPadding": 8,
+        "labelExpr": "split(datum.value, '|')[1]"
+      }
+    }
+  },
+  "resolve": {
+    "scale": {
+      "color": "shared"
     }
   },
   "layer": [
     {
-      "mark": { "type": "bar", "height": { "band": 0.7 }, "cornerRadiusEnd": 3 },
+      "description": "Side by side: one bar per group, boys drawn to the left.",
+      "transform": [
+        {
+          "filter": "view_mode === 'Side by side'"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "height": {
+          "band": 0.7
+        },
+        "cornerRadiusEnd": 3
+      },
       "encoding": {
+        "x": {
+          "field": "signed",
+          "type": "quantitative",
+          "scale": {
+            "domain": {
+              "expr": "view_mode === 'Side by side' ? [-80, 80] : [-30, 30]"
+            }
+          },
+          "axis": {
+            "title": {
+              "expr": "view_mode === 'Side by side' ? (width < 500 ? 'Share who watch (%)' : 'Share of boys / girls aged 6-13 who watch YouTube (%)') : (width < 500 ? 'Girls minus boys (points)' : 'Difference, girls minus boys (percentage points)')"
+            },
+            "labelExpr": "abs(datum.value)",
+            "tickCount": {
+              "expr": "width < 500 ? 4 : 8"
+            }
+          }
+        },
         "color": {
           "field": "gender_label",
           "type": "nominal",
           "title": null,
-          "scale": { "domain": ["Boys", "Girls"], "range": ["#2a78d6", "#eb6834"] },
+          "scale": {
+            "domain": [
+              "Boys",
+              "Girls"
+            ],
+            "range": [
+              "#2a78d6",
+              "#eda100"
+            ]
+          },
           "legend": null
         },
         "tooltip": [
-          { "field": "category", "title": "Category" },
-          { "field": "gender_label", "title": "Group" },
-          { "field": "pct", "title": "Watch this category (%)", "format": ".0f" }
+          {
+            "field": "category",
+            "title": "Category"
+          },
+          {
+            "field": "gender_label",
+            "title": "Group"
+          },
+          {
+            "field": "pct",
+            "title": "Watch this category (%)",
+            "format": ".0f"
+          },
+          {
+            "field": "gap",
+            "title": "Girls minus boys (points)",
+            "format": "+.0f"
+          }
         ]
       }
     },
     {
-      "mark": { "type": "text", "fontSize": 12, "dx": { "expr": "datum.signed < 0 ? -6 : 6" }, "align": { "expr": "datum.signed < 0 ? 'right' : 'left'" } },
+      "transform": [
+        {
+          "filter": "view_mode === 'Side by side'"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "dx": {
+          "expr": "datum.signed < 0 ? -6 : 6"
+        },
+        "align": {
+          "expr": "datum.signed < 0 ? 'right' : 'left'"
+        }
+      },
       "encoding": {
-        "text": { "field": "pct", "type": "quantitative", "format": ".0f" },
-        "color": { "value": "#52514e" }
+        "x": {
+          "field": "signed",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "pct",
+          "type": "quantitative",
+          "format": ".0f"
+        },
+        "color": {
+          "value": "#52514e"
+        }
       }
     },
     {
-      "data": { "values": [{ "x": -78, "label": "Boys" }, { "x": 78, "label": "Girls" }] },
-      "mark": { "type": "text", "fontSize": 14, "fontWeight": "bold", "baseline": "bottom", "dy": -6, "align": { "expr": "datum.x < 0 ? 'left' : 'right'" } },
+      "description": "Difference: one bar per category from 0 to (girls - boys), coloured by the group it leans towards.",
+      "transform": [
+        {
+          "filter": "view_mode === 'Difference' && datum.gender === 'girls'"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "height": {
+          "band": 0.7
+        },
+        "cornerRadiusEnd": 3
+      },
       "encoding": {
-        "x": { "field": "x", "type": "quantitative" },
-        "y": { "value": 0 },
-        "text": { "field": "label" },
-        "color": { "field": "label", "type": "nominal", "scale": { "domain": ["Boys", "Girls"], "range": ["#2a78d6", "#eb6834"] }, "legend": null }
+        "x": {
+          "field": "gap",
+          "type": "quantitative"
+        },
+        "color": {
+          "field": "lean",
+          "type": "nominal",
+          "legend": null
+        },
+        "tooltip": [
+          {
+            "field": "category",
+            "title": "Category"
+          },
+          {
+            "field": "lean",
+            "title": "Watched more by"
+          },
+          {
+            "field": "gap",
+            "title": "Girls minus boys (points)",
+            "format": "+.0f"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "view_mode === 'Difference' && datum.gender === 'girls'"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "dx": {
+          "expr": "datum.gap < 0 ? -6 : 6"
+        },
+        "align": {
+          "expr": "datum.gap < 0 ? 'right' : 'left'"
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "gap",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "gap",
+          "type": "quantitative",
+          "format": "+.0f"
+        },
+        "color": {
+          "value": "#52514e"
+        }
+      }
+    },
+    {
+      "description": "Group names at the top of each side.",
+      "data": {
+        "values": [
+          {
+            "side": -1,
+            "group": "Boys"
+          },
+          {
+            "side": 1,
+            "group": "Girls"
+          }
+        ]
+      },
+      "transform": [
+        {
+          "calculate": "datum.side * (view_mode === 'Side by side' ? 79 : 29.5)",
+          "as": "xpos"
+        },
+        {
+          "calculate": "view_mode === 'Side by side' ? datum.group : (datum.side < 0 ? '← More boys' : 'More girls →')",
+          "as": "label"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "baseline": "bottom",
+        "dy": -6,
+        "align": {
+          "expr": "datum.side < 0 ? 'left' : 'right'"
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "xpos",
+          "type": "quantitative"
+        },
+        "y": {
+          "value": 0
+        },
+        "text": {
+          "field": "label"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.side < 0",
+            "value": "#2a78d6"
+          },
+          "value": "#8f6200"
+        }
       }
     }
   ]

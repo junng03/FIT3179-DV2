@@ -1,24 +1,49 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "World choropleth (Equal Earth projection): where in the world people search YouTube for each Australian creator, past 12 months. Use the dropdown to switch creator. 100 = the country where that creator's share of searches was highest. Australia outlined in orange. Source: Google Trends (YouTube Search), exported by the author; country boundaries: Natural Earth via vega-datasets. NOTE: the dropdown options must match the creator names in data/trends_world.csv.",
+  "description": "World choropleth (Equal Earth projection): where in the world people search YouTube for Australian creators, past 12 months. The menu shows all four creators combined (the default) or one creator. Each creator is scored 0-100 by Google Trends, 100 = the country where that creator's share of searches was highest. The combined score is the average of the four scores; a country Google left out for a creator (too little search volume, reported by Google as 0) counts as 0 for that creator. A second control zooms to the Asia-Pacific. Australia outlined in orange. Source: Google Trends (YouTube Search), retrieved by the author with scripts/fetch_trends.py; country boundaries: Natural Earth via vega-datasets. NOTE: the menu options must match the creator names in data/trends_world.csv.",
   "width": "container",
   "height": 420,
   "projection": {
-    "type": "equalEarth"
+    "type": "equalEarth",
+    "rotate": {
+      "expr": "region === 'World' ? [0, 0, 0] : [-142, 0, 0]"
+    },
+    "center": {
+      "expr": "region === 'World' ? [0, 8] : [0, -14]"
+    },
+    "scale": {
+      "expr": "region === 'World' ? min(width / 5.6, height / 2.35) : min(width / 2.4, height / 1.45)"
+    },
+    "translate": {
+      "expr": "[width / 2, height / 2]"
+    }
   },
   "params": [
     {
       "name": "creator_pick",
-      "value": "How Ridiculous",
+      "value": "All four creators",
       "bind": {
         "input": "select",
         "options": [
+          "All four creators",
           "How Ridiculous",
           "LazarBeam",
           "Lachlan",
           "Bridey Drake"
         ],
         "name": "Creator: "
+      }
+    },
+    {
+      "name": "region",
+      "value": "World",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "World",
+          "Asia-Pacific"
+        ],
+        "name": "Zoom: "
       }
     }
   ],
@@ -39,7 +64,7 @@
       "description": "Base layer: every country in grey (no data or too little search volume).",
       "mark": {
         "type": "geoshape",
-        "fill": "#e1e0d9",
+        "fill": "#e8e7e1",
         "stroke": "#fcfcfb",
         "strokeWidth": 0.5
       }
@@ -57,7 +82,101 @@
       },
       "transform": [
         {
-          "filter": "datum.creator === creator_pick && isValid(datum.interest) && datum.interest > 0"
+          "filter": "isValid(datum.interest) && datum.interest > 0"
+        },
+        {
+          "calculate": "datum.creator === 'How Ridiculous' ? datum.interest : null",
+          "as": "s_hr"
+        },
+        {
+          "calculate": "datum.creator === 'LazarBeam' ? datum.interest : null",
+          "as": "s_lb"
+        },
+        {
+          "calculate": "datum.creator === 'Lachlan' ? datum.interest : null",
+          "as": "s_la"
+        },
+        {
+          "calculate": "datum.creator === 'Bridey Drake' ? datum.interest : null",
+          "as": "s_bd"
+        },
+        {
+          "joinaggregate": [
+            {
+              "op": "sum",
+              "field": "interest",
+              "as": "sum_of_four"
+            },
+            {
+              "op": "count",
+              "as": "n_scored"
+            },
+            {
+              "op": "max",
+              "field": "s_hr",
+              "as": "hr"
+            },
+            {
+              "op": "max",
+              "field": "s_lb",
+              "as": "lb"
+            },
+            {
+              "op": "max",
+              "field": "s_la",
+              "as": "la"
+            },
+            {
+              "op": "max",
+              "field": "s_bd",
+              "as": "bd"
+            }
+          ],
+          "groupby": [
+            "iso_n3"
+          ]
+        },
+        {
+          "window": [
+            {
+              "op": "row_number",
+              "as": "row_in_country"
+            }
+          ],
+          "groupby": [
+            "iso_n3"
+          ]
+        },
+        {
+          "filter": "creator_pick === 'All four creators' ? datum.row_in_country === 1 : datum.creator === creator_pick"
+        },
+        {
+          "calculate": "creator_pick === 'All four creators' ? datum.sum_of_four / 4 : datum.interest",
+          "as": "score"
+        },
+        {
+          "calculate": "creator_pick === 'All four creators' ? 'All four (average)' : datum.creator",
+          "as": "showing"
+        },
+        {
+          "calculate": "datum.n_scored + ' of 4'",
+          "as": "scored_label"
+        },
+        {
+          "calculate": "isValid(datum.hr) ? toString(datum.hr) : 'too few searches'",
+          "as": "hr_label"
+        },
+        {
+          "calculate": "isValid(datum.lb) ? toString(datum.lb) : 'too few searches'",
+          "as": "lb_label"
+        },
+        {
+          "calculate": "isValid(datum.la) ? toString(datum.la) : 'too few searches'",
+          "as": "la_label"
+        },
+        {
+          "calculate": "isValid(datum.bd) ? toString(datum.bd) : 'too few searches'",
+          "as": "bd_label"
         },
         {
           "lookup": "iso_n3",
@@ -88,9 +207,9 @@
           "type": "geojson"
         },
         "color": {
-          "field": "interest",
+          "field": "score",
           "type": "quantitative",
-          "title": "Relative search interest (100 = highest country)",
+          "title": "Search interest, 0-100 (100 = highest country)",
           "scale": {
             "domain": [
               0,
@@ -102,7 +221,7 @@
             ]
           },
           "legend": {
-            "orient": "bottom-left",
+            "orient": "bottom",
             "direction": "horizontal",
             "gradientLength": 200,
             "titleLimit": 320
@@ -114,12 +233,33 @@
             "title": "Country"
           },
           {
-            "field": "creator",
-            "title": "Creator"
+            "field": "showing",
+            "title": "Showing"
           },
           {
-            "field": "interest",
-            "title": "Relative search interest (0-100)"
+            "field": "score",
+            "title": "Search interest (0-100)",
+            "format": ".1~f"
+          },
+          {
+            "field": "scored_label",
+            "title": "Creators with enough searches"
+          },
+          {
+            "field": "hr_label",
+            "title": "How Ridiculous"
+          },
+          {
+            "field": "lb_label",
+            "title": "LazarBeam"
+          },
+          {
+            "field": "la_label",
+            "title": "Lachlan"
+          },
+          {
+            "field": "bd_label",
+            "title": "Bridey Drake"
           }
         ]
       }

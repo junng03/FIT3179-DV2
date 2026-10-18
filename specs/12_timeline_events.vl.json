@@ -1,93 +1,296 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Annotated timeline of policy, research and industry events affecting Australian creators' audiences, November 2024 to September 2026. Sources: eSafety, ACMA, University of Canberra, IAB Australia.",
+  "description": "Annotated timeline of policy, research and industry events affecting Australian creators' audiences, November 2024 to September 2026. Policy events (the under-16 law) are orange, research blue, industry grey. Click an event type in the legend to show only those events. Sources: eSafety, ACMA, University of Canberra, IAB Australia.",
   "width": "container",
   "height": 400,
   "data": {
     "url": "data/timeline_events.csv",
-    "format": { "type": "csv", "parse": { "date": "date", "lane": "number" } }
+    "format": {
+      "type": "csv",
+      "parse": {
+        "date": "date",
+        "lane": "number"
+      }
+    }
   },
   "layer": [
     {
-      "mark": { "type": "rule", "color": "#c3c2b7", "strokeWidth": 1.5 },
+      "mark": {
+        "type": "rule",
+        "color": "#c3c2b7",
+        "strokeWidth": 1.5
+      },
       "encoding": {
-        "y": { "datum": 0, "type": "quantitative", "scale": { "domain": [-4, 4] }, "axis": null }
+        "y": {
+          "datum": 0,
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -4,
+              4
+            ]
+          },
+          "axis": null
+        }
       }
     },
     {
       "description": "Annotation: the year between the law passing and the minimum age taking effect.",
-      "data": { "values": [{ "start": "2024-11-28", "end": "2025-12-10", "note": "A year for platforms to get ready" }] },
+      "data": {
+        "values": [
+          {
+            "start": "2024-11-28",
+            "end": "2025-12-10",
+            "note": "A year for platforms to get ready"
+          }
+        ]
+      },
       "layer": [
         {
-          "mark": { "type": "rule", "color": "#eb6834", "strokeWidth": 4, "opacity": 0.35 },
+          "mark": {
+            "type": "rule",
+            "color": "#eb6834",
+            "strokeWidth": 4,
+            "opacity": 0.35
+          },
           "encoding": {
-            "x": { "field": "start", "type": "temporal" },
-            "x2": { "field": "end" },
-            "y": { "datum": 0, "type": "quantitative" }
+            "x": {
+              "field": "start",
+              "type": "temporal"
+            },
+            "x2": {
+              "field": "end"
+            },
+            "y": {
+              "datum": 0,
+              "type": "quantitative"
+            }
           }
         },
         {
-          "transform": [{ "calculate": "(toDate(datum.start) + toDate(datum.end)) / 2", "as": "mid" }],
-          "mark": { "type": "text", "dy": -12, "fontStyle": "italic", "color": "#52514e" },
+          "transform": [
+            {
+              "calculate": "(toDate(datum.start) + toDate(datum.end)) / 2",
+              "as": "mid"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "dy": -12,
+            "fontStyle": "italic",
+            "color": "#a8431b"
+          },
           "encoding": {
-            "x": { "field": "mid", "type": "temporal" },
-            "y": { "datum": 0, "type": "quantitative" },
-            "text": { "field": "note" }
+            "x": {
+              "field": "mid",
+              "type": "temporal"
+            },
+            "y": {
+              "datum": 0,
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "note"
+            }
           }
         }
       ]
     },
     {
-      "mark": { "type": "rule", "color": "#898781", "strokeDash": [2, 3] },
+      "mark": {
+        "type": "rule",
+        "color": "#898781",
+        "strokeDash": [
+          2,
+          3
+        ]
+      },
       "encoding": {
         "x": {
           "field": "date",
           "type": "temporal",
           "title": null,
-          "scale": { "domain": ["2024-09-01", "2026-11-30"] },
-          "axis": { "format": "%b %Y", "tickCount": { "interval": "month", "step": 3 }, "grid": false, "domain": false, "labelFlush": true }
+          "scale": {
+            "domain": [
+              "2024-09-01",
+              "2026-11-30"
+            ]
+          },
+          "axis": {
+            "format": "%b %Y",
+            "tickCount": {
+              "interval": "month",
+              "step": 3
+            },
+            "grid": false,
+            "domain": false,
+            "labelFlush": true
+          }
         },
-        "y": { "field": "lane", "type": "quantitative" },
-        "y2": { "datum": 0 }
+        "y": {
+          "field": "lane",
+          "type": "quantitative"
+        },
+        "y2": {
+          "datum": 0
+        },
+        "opacity": {
+          "condition": {
+            "param": "type_pick",
+            "value": 1
+          },
+          "value": 0.15
+        }
       }
     },
     {
-      "mark": { "type": "point", "filled": true, "opacity": 1, "size": 140, "stroke": "#fcfcfb", "strokeWidth": 2 },
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "opacity": 1,
+        "size": 140,
+        "stroke": "#fcfcfb",
+        "strokeWidth": 2,
+        "cursor": "pointer"
+      },
       "encoding": {
-        "x": { "field": "date", "type": "temporal" },
-        "y": { "field": "lane", "type": "quantitative" },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "lane",
+          "type": "quantitative"
+        },
         "color": {
           "field": "type",
           "type": "nominal",
           "title": "Event type",
-          "scale": { "domain": ["Policy", "Research", "Industry"], "range": ["#eb6834", "#2a78d6", "#1baf7a"] },
-          "legend": { "orient": "top", "direction": "horizontal" }
+          "scale": {
+            "domain": [
+              "Policy",
+              "Research",
+              "Industry"
+            ],
+            "range": [
+              "#eb6834",
+              "#2a78d6",
+              "#52514e"
+            ]
+          },
+          "legend": {
+            "orient": "top",
+            "direction": "horizontal",
+            "symbolOpacity": 1
+          }
         },
         "tooltip": [
-          { "field": "when", "title": "When" },
-          { "field": "event", "title": "Event" },
-          { "field": "source", "title": "Source" }
-        ]
+          {
+            "field": "when",
+            "title": "When"
+          },
+          {
+            "field": "event",
+            "title": "Event"
+          },
+          {
+            "field": "source",
+            "title": "Source"
+          }
+        ],
+        "opacity": {
+          "condition": {
+            "param": "type_pick",
+            "value": 1
+          },
+          "value": 0.15
+        }
+      },
+      "params": [
+        {
+          "name": "type_pick",
+          "select": {
+            "type": "point",
+            "fields": [
+              "type"
+            ]
+          },
+          "bind": "legend"
+        }
+      ]
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.anchor === 'start'"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10,
+        "lineBreak": "|",
+        "lineHeight": 15
+      },
+      "encoding": {
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "lane",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "label"
+        },
+        "color": {
+          "value": "#0b0b0b"
+        },
+        "opacity": {
+          "condition": {
+            "param": "type_pick",
+            "value": 1
+          },
+          "value": 0.15
+        }
       }
     },
     {
-      "transform": [{ "filter": "datum.anchor === 'start'" }],
-      "mark": { "type": "text", "align": "left", "dx": 10, "fontSize": 12, "lineBreak": "|", "lineHeight": 15 },
+      "transform": [
+        {
+          "filter": "datum.anchor === 'end'"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "right",
+        "dx": -10,
+        "lineBreak": "|",
+        "lineHeight": 15
+      },
       "encoding": {
-        "x": { "field": "date", "type": "temporal" },
-        "y": { "field": "lane", "type": "quantitative" },
-        "text": { "field": "label" },
-        "color": { "value": "#0b0b0b" }
-      }
-    },
-    {
-      "transform": [{ "filter": "datum.anchor === 'end'" }],
-      "mark": { "type": "text", "align": "right", "dx": -10, "fontSize": 12, "lineBreak": "|", "lineHeight": 15 },
-      "encoding": {
-        "x": { "field": "date", "type": "temporal" },
-        "y": { "field": "lane", "type": "quantitative" },
-        "text": { "field": "label" },
-        "color": { "value": "#0b0b0b" }
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "lane",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "label"
+        },
+        "color": {
+          "value": "#0b0b0b"
+        },
+        "opacity": {
+          "condition": {
+            "param": "type_pick",
+            "value": 1
+          },
+          "value": 0.15
+        }
       }
     }
   ]

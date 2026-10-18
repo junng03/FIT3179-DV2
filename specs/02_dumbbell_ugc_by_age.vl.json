@@ -1,8 +1,22 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the past 7 days, 2024 vs 2025. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
+  "description": "Dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the past 7 days, 2024 (grey) vs 2025 (orange). A switch orders the age groups by age or by the size of the drop. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
   "width": "container",
   "height": 300,
+  "params": [
+    {
+      "name": "order_by",
+      "value": "Age",
+      "bind": {
+        "input": "radio",
+        "options": [
+          "Age",
+          "Biggest drop"
+        ],
+        "name": "Order by: "
+      }
+    }
+  ],
   "data": {
     "url": "data/acma_ugc_by_age.csv",
     "format": {
@@ -17,27 +31,78 @@
     {
       "calculate": "toString(datum.year)",
       "as": "year_label"
+    },
+    {
+      "calculate": "datum.year === 2024 ? datum.pct : null",
+      "as": "p2024"
+    },
+    {
+      "calculate": "datum.year === 2025 ? datum.pct : null",
+      "as": "p2025"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "p2024",
+          "as": "pct_2024"
+        },
+        {
+          "op": "max",
+          "field": "p2025",
+          "as": "pct_2025"
+        }
+      ],
+      "groupby": [
+        "age_group"
+      ]
+    },
+    {
+      "calculate": "datum.pct_2025 - datum.pct_2024",
+      "as": "change"
+    },
+    {
+      "calculate": "indexof(['18-24', '25-34', '35-44', '45-54', '55-64', '65-74', '75+'], datum.age_group)",
+      "as": "age_index"
+    },
+    {
+      "calculate": "order_by === 'Age' ? datum.age_index : datum.change",
+      "as": "sort_key"
+    },
+    {
+      "window": [
+        {
+          "op": "dense_rank",
+          "as": "position"
+        }
+      ],
+      "sort": [
+        {
+          "field": "sort_key",
+          "order": "ascending"
+        },
+        {
+          "field": "age_group",
+          "order": "ascending"
+        }
+      ]
+    },
+    {
+      "calculate": "(datum.position < 10 ? '0' : '') + datum.position + '|' + datum.age_group",
+      "as": "y_key"
     }
   ],
   "encoding": {
     "y": {
-      "field": "age_group",
+      "field": "y_key",
       "type": "ordinal",
       "title": null,
-      "sort": [
-        "18-24",
-        "25-34",
-        "35-44",
-        "45-54",
-        "55-64",
-        "65-74",
-        "75+"
-      ],
+      "sort": "ascending",
       "axis": {
         "domain": false,
         "ticks": false,
-        "labelFontSize": 13,
-        "labelPadding": 8
+        "labelPadding": 8,
+        "labelExpr": "split(datum.value, '|')[1]"
       }
     },
     "x": {
@@ -51,8 +116,7 @@
         ]
       },
       "axis": {
-        "tickCount": 5,
-        "gridColor": "#e1e0d9"
+        "tickCount": 5
       }
     }
   },
@@ -94,7 +158,7 @@
               "2025"
             ],
             "range": [
-              "#c3c2b7",
+              "#aeada5",
               "#eb6834"
             ]
           },
@@ -116,6 +180,11 @@
             "field": "pct",
             "title": "Watched in past 7 days (%)",
             "format": ".0f"
+          },
+          {
+            "field": "change",
+            "title": "Change 2024 to 2025 (points)",
+            "format": "+.1f"
           }
         ]
       }
@@ -130,8 +199,7 @@
         "type": "text",
         "align": "right",
         "dx": -12,
-        "fontSize": 12,
-        "color": "#eb6834",
+        "color": "#a8431b",
         "fontWeight": "bold"
       },
       "encoding": {
@@ -152,7 +220,6 @@
         "type": "text",
         "align": "left",
         "dx": 12,
-        "fontSize": 12,
         "color": "#898781"
       },
       "encoding": {

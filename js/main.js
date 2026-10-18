@@ -2,6 +2,13 @@
    If a chart's data file is missing or empty, a "data pending" card is shown
    instead, naming the file, columns and source it needs. No values are invented. */
 
+/* Colour roles, used the same way in every spec (and in css/style.css):
+     orange  #eb6834  what to look at: the story's focus, or what the reader selected
+     blue    #2a78d6  the data itself; the ramp #cde2fb -> #0d366b means "more"
+     amber   #eda100  the second group when two groups are compared (girls vs boys)
+     grey    #aeada5  context (other services, earlier year, longer videos)
+     light   #e8e7e1  no data
+   All chart text is 12px Atkinson Hyperlegible; facet headers and in-chart titles are 13px bold. */
 const THEME = {
   font: "Atkinson Hyperlegible, system-ui, sans-serif",
   background: "#fcfcfb",
@@ -25,16 +32,33 @@ const THEME = {
     titleFontWeight: "normal",
     symbolType: "circle"
   },
-  title: { font: "Bricolage Grotesque, system-ui, sans-serif", color: "#0b0b0b" },
+  header: {
+    labelColor: "#0b0b0b",
+    labelFontSize: 13,
+    labelFontWeight: "bold",
+    titleFontSize: 12
+  },
+  title: {
+    font: "Atkinson Hyperlegible, system-ui, sans-serif",
+    color: "#0b0b0b",
+    fontSize: 13,
+    fontWeight: "bold",
+    anchor: "start",
+    offset: 12
+  },
   text: { font: "Atkinson Hyperlegible, system-ui, sans-serif", color: "#52514e", fontSize: 12 },
   range: {
-    category: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+    category: ["#2a78d6", "#eda100", "#eb6834", "#aeada5"],
+    ramp: ["#cde2fb", "#0d366b"]
   }
 };
 
 const EMBED_OPTIONS = {
   renderer: "svg",
   config: THEME,
+  // Ask the server whether each CSV has changed instead of reusing a cached copy, so an
+  // updated data file (e.g. new columns) can't be paired with an old one from the cache.
+  loader: vega.loader({ http: { cache: "no-cache" } }),
   actions: { export: true, source: true, compiled: false, editor: true }
 };
 

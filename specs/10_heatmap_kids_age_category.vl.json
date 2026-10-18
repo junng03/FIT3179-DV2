@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Heatmap: share of Australian children who watch YouTube that watch each of the five most popular video categories, for ages 6-9, ages 10-13 and all 6-13 year olds. Darker = larger share. Roy Morgan publishes only the top categories for each age group, so some cells are marked 'not published'; Gaming is the #1 category in every age group but its share by age is not published. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
+  "description": "Heatmap: share of Australian children who watch YouTube that watch each of the five most popular video categories, for ages 6-9, ages 10-13 and all 6-13 year olds. Darker = larger share. Roy Morgan publishes only the top categories for each age group, so some cells are marked 'not published'; Gaming is the #1 category in every age group but its share by age is not published. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025. Hovering a category outlines its row in orange.",
   "width": "container",
   "height": 300,
   "data": {
@@ -37,7 +37,6 @@
         "labelAngle": 0,
         "domain": false,
         "ticks": false,
-        "labelFontSize": 13,
         "labelFontWeight": "bold",
         "labelExpr": "datum.value === 'All 6-13' ? 'All ages 6-13' : 'Ages ' + datum.value"
       }
@@ -55,8 +54,7 @@
       ],
       "axis": {
         "domain": false,
-        "ticks": false,
-        "labelFontSize": 13
+        "ticks": false
       }
     }
   },
@@ -66,9 +64,8 @@
       "mark": {
         "type": "rect",
         "cornerRadius": 2,
-        "stroke": "#fcfcfb",
         "strokeWidth": 3,
-        "fill": "#f0efec"
+        "fill": "#e8e7e1"
       },
       "encoding": {
         "tooltip": [
@@ -84,14 +81,34 @@
             "field": "tooltip_value",
             "title": "Watch this category"
           }
-        ]
-      }
+        ],
+        "stroke": {
+          "condition": {
+            "param": "hover_cat",
+            "empty": false,
+            "value": "#eb6834"
+          },
+          "value": "#fcfcfb"
+        }
+      },
+      "params": [
+        {
+          "name": "hover_cat",
+          "select": {
+            "type": "point",
+            "fields": [
+              "category"
+            ],
+            "on": "pointerover",
+            "clear": "pointerout"
+          }
+        }
+      ]
     },
     {
       "mark": {
         "type": "rect",
         "cornerRadius": 2,
-        "stroke": "#fcfcfb",
         "strokeWidth": 3
       },
       "encoding": {
@@ -129,7 +146,15 @@
             "field": "tooltip_value",
             "title": "Watch this category"
           }
-        ]
+        ],
+        "stroke": {
+          "condition": {
+            "param": "hover_cat",
+            "empty": false,
+            "value": "#eb6834"
+          },
+          "value": "#fcfcfb"
+        }
       },
       "transform": [
         {
@@ -140,7 +165,9 @@
     {
       "mark": {
         "type": "text",
-        "fontSize": 13
+        "fontWeight": {
+          "expr": "datum.label === '#1' ? 'bold' : 'normal'"
+        }
       },
       "encoding": {
         "text": {
@@ -150,7 +177,7 @@
           "condition": [
             {
               "test": "!isValid(datum.pct)",
-              "value": "#898781"
+              "value": "#52514e"
             },
             {
               "test": "datum.pct >= 38",
@@ -158,13 +185,6 @@
             }
           ],
           "value": "#0b0b0b"
-        },
-        "fontWeight": {
-          "condition": {
-            "test": "datum.label === '#1'",
-            "value": "bold"
-          },
-          "value": "normal"
         }
       }
     }

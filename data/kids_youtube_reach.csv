@@ -1,3 +1,7 @@
-group,order,pct,source
-Watch YouTube,1,89,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-13, Apr-Dec 2025, n=1,129"
-Don't watch YouTube,2,11,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-13, Apr-Dec 2025, n=1,129"
+age_group,group,order,pct,source
+All 6-13,Watch YouTube,1,89,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-13, Apr-Dec 2025, n=1,129"
+All 6-13,Don't watch YouTube,2,11,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-13, Apr-Dec 2025, n=1,129"
+6-7,Watch YouTube,1,84,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-7, Apr-Dec 2025"
+6-7,Don't watch YouTube,2,16,"Roy Morgan (2026), YouTube for Young Australians: children aged 6-7, Apr-Dec 2025"
+8-13,Watch YouTube,1,91,"Roy Morgan (2026), YouTube for Young Australians: children aged 8 and over (8-13 in this survey), Apr-Dec 2025"
+8-13,Don't watch YouTube,2,9,"Roy Morgan (2026), YouTube for Young Australians: children aged 8 and over (8-13 in this survey), Apr-Dec 2025"
