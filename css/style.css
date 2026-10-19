@@ -1,15 +1,22 @@
-/* Made for the Feed — FIT3179 DV2
-   Light theme only. Colours follow a CVD-validated categorical palette. */
+/* style.css: the look of the whole page (Made for the Feed, FIT3179 DV2).
+   Light theme only. Colours follow a colour-blind-safe palette and the same colour roles as the
+   charts (see THEME in js/main.js), so the page and the charts look like one design.
+   Order of this file: variables -> base -> hero -> acts -> chart cards -> chart controls ->
+   colour key -> annotation -> before/after panel -> pending card -> about/sources -> phones. */
 
+
+/* ---------- Design tokens (CSS variables) ----------
+   Every colour, font and width is defined once here and reused below as var(--name).
+   Why: one change here updates the whole page, and it keeps the page matching the charts. */
 :root {
-  color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --hairline: #e1e0d9;
-  --axis: #c3c2b7;
+  color-scheme: light;    /* tell the browser this is a light page (form controls, scrollbars) */
+  --page: #f9f9f7;        /* page background */
+  --surface: #fcfcfb;     /* card background; also the chart background in THEME */
+  --ink: #0b0b0b;         /* main text */
+  --ink-2: #52514e;       /* secondary text (captions, labels) */
+  --muted: #898781;       /* least important text (sources, byline) */
+  --hairline: #e1e0d9;    /* thin borders and dividers */
+  --axis: #c3c2b7;        /* chart axes and input borders */
   /* Colour roles, shared with the charts (see THEME in js/main.js) */
   --accent: #eb6834;      /* orange: what to look at (the story's focus, or the reader's selection) */
   --accent-ink: #a8431b;  /* darker orange for text on light backgrounds */
@@ -17,14 +24,19 @@
   --amber: #eda100;       /* the second group in a two-group comparison */
   --context: #aeada5;     /* context: other, earlier or longer */
   --nodata: #e8e7e1;      /* no data */
-  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
-  --measure: 68ch;
-  --wrap: 1120px;
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;  /* headings */
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;   /* text and charts; designed for legibility */
+  --measure: 68ch;        /* max line length for reading text (about 68 characters is comfortable) */
+  --wrap: 1120px;         /* max width of the page content */
 }
 
+
+/* ---------- Base ---------- */
+
+/* Padding and borders count inside an element's width, so widths add up as expected. */
 * { box-sizing: border-box; }
 
+/* Clicking a source number glides to the source list instead of jumping. */
 html { scroll-behavior: smooth; }
 
 body {
@@ -32,11 +44,12 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 1.0625rem;
+  font-size: 1.0625rem;   /* 17px: slightly larger than the default for easier reading */
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Centres the content and caps its width; used inside every section. */
 .wrap {
   max-width: var(--wrap);
   margin: 0 auto;
@@ -46,16 +59,19 @@ body {
 a { color: var(--blue); text-underline-offset: 2px; }
 a:hover { color: #1c5cab; }
 
+/* Source numbers: small, and line-height 0 so they don't push lines of text apart. */
 sup { line-height: 0; font-size: 0.7em; }
 sup a { text-decoration: none; padding: 0 1px; }
 
-/* ---------- Hero ---------- */
+
+/* ---------- Hero (title area) ---------- */
 .hero {
   padding: 72px 0 56px;
   border-bottom: 1px solid var(--hairline);
   background: var(--surface);
 }
 
+/* The small orange line above the title */
 .kicker {
   margin: 0 0 12px;
   font-family: var(--font-display);
@@ -69,12 +85,14 @@ sup a { text-decoration: none; padding: 0 1px; }
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; }
 
 h1 {
+  /* clamp(min, preferred, max): grows with the window (6% of its width) but stays between 2.6 and 4.4rem */
   font-size: clamp(2.6rem, 6vw, 4.4rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   max-width: 14ch;
 }
 
+/* The one-paragraph summary under the title */
 .dek {
   max-width: var(--measure);
   font-size: 1.25rem;
@@ -85,6 +103,7 @@ h1 {
 
 .byline { color: var(--muted); font-size: 0.95rem; margin: 0 0 40px; }
 
+/* Four key figures side by side. CSS grid: 4 equal columns ("1fr" = one equal share of the width). */
 .stat-strip {
   list-style: none;
   padding: 0;
@@ -109,10 +128,13 @@ h1 {
 
 .stat-label { display: block; color: var(--ink-2); font-size: 0.92rem; line-height: 1.45; margin-top: 6px; }
 
-/* ---------- Acts ---------- */
+
+/* ---------- Acts (the five story sections) ---------- */
 .act { padding: 72px 0 24px; }
+/* "+" = an act that follows another act: draw a divider between consecutive acts only. */
 .act + .act { border-top: 1px solid var(--hairline); }
 
+/* "Part 1", "Part 2" ... above each act title */
 .act-num {
   margin: 0 0 6px;
   font-family: var(--font-display);
@@ -128,25 +150,33 @@ h2 {
   margin-bottom: 20px;
 }
 
+/* Story text: limited to a comfortable line length. */
 .prose { max-width: var(--measure); }
 .prose p { margin: 0 0 1em; }
 
+
 /* ---------- Chart cards ---------- */
+
+/* The white card around each chart, its caption and its source. */
 .chart-card {
   margin: 32px 0 48px;
   padding: 24px 24px 16px;
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: 10px;
-  min-width: 0;
+  min-width: 0;            /* lets the card shrink inside a grid instead of overflowing */
 }
 
 .chart-card figcaption h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 6px; }
 
+/* "How to read this chart" text under each chart title */
 .how-to-read { margin: 0 0 16px; color: var(--ink-2); font-size: 0.95rem; max-width: var(--measure); }
 
+/* Where main.js draws the chart. A wide chart scrolls sideways inside the card on a small
+   screen, rather than making the whole page scroll sideways. */
 .chart-mount { width: 100%; min-height: 120px; overflow-x: auto; }
 
+/* Source line at the bottom of each card */
 .chart-source {
   margin: 12px 0 0;
   padding-top: 10px;
@@ -155,6 +185,7 @@ h2 {
   font-size: 0.85rem;
 }
 
+/* Two cards side by side (kept for layout options; stacks to one column on small screens). */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -163,13 +194,14 @@ h2 {
 }
 .two-col .chart-card { margin: 0; }
 
-/* "Try it" line: the same cue on every interactive chart */
+/* "Try it" line: the same cue on every interactive chart, so readers learn to look for it. */
 .try-it {
   margin: -8px 0 16px;
   color: var(--ink-2);
   font-size: 0.95rem;
   max-width: var(--measure);
 }
+/* The small orange "TRY IT" pill (border-radius 999px makes fully rounded ends). */
 .try-it-label {
   display: inline-block;
   margin-right: 6px;
@@ -184,19 +216,25 @@ h2 {
   text-transform: uppercase;
 }
 
-/* Vega embed tweaks */
-.vega-embed { width: 100%; }
-.vega-embed .vega-actions a { font-family: var(--font-body); }
-.vega-embed summary { opacity: 0.6; }
 
-/* Chart controls (Vega bindings): shown above the chart, styled like the page */
-/* vega-embed puts the chart and its controls inside .chart-wrapper; full width also lets the
-   Vega treemap read the card's width with containerSize() */
+/* ---------- Chart controls and vega-embed tweaks ----------
+   vega-embed adds its own elements around each chart; these rules make them match the page. */
+
+.vega-embed { width: 100%; }
+.vega-embed .vega-actions a { font-family: var(--font-body); }  /* the "..." menu items */
+.vega-embed summary { opacity: 0.6; }                             /* soften the "..." button */
+
+/* Chart controls (Vega bindings): shown above the chart, styled like the page.
+   vega-embed puts the chart and its controls inside .chart-wrapper. Making that wrapper a
+   full-width flex column lets us move the controls above the chart (order: -1 below), and full
+   width also lets the Vega treemap read the card's width with containerSize(). */
 .chart-mount .chart-wrapper { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+
+/* The grey bar that holds a chart's menus and switches */
 .chart-mount .vega-bindings {
-  order: -1;
+  order: -1;               /* show before (above) the chart, although Vega adds it after */
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;         /* controls wrap onto a new line on narrow screens */
   gap: 8px 28px;
   margin: 0 0 14px;
   padding: 10px 14px;
@@ -208,11 +246,13 @@ h2 {
   font-size: 0.92rem;
   color: var(--ink-2);
 }
+/* Charts whose interaction is only hover or click have an empty controls bar; hide it. */
 .chart-mount .vega-bindings:empty { display: none; }
 .chart-mount .vega-bind > label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
-.chart-mount .vega-bind-name { font-weight: 700; color: var(--ink); }
+.chart-mount .vega-bind-name { font-weight: 700; color: var(--ink); }   /* e.g. "Show:" */
 .chart-mount .vega-bind-radio { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; }
 .chart-mount .vega-bind-radio label { display: inline-flex; align-items: center; gap: 4px; margin: 0; cursor: pointer; }
+/* accent-color paints the selected radio button orange, the "your selection" colour */
 .chart-mount .vega-bind input[type="radio"] { accent-color: var(--accent); margin: 0; cursor: pointer; }
 .chart-mount .vega-bind select {
   font: inherit;
@@ -224,13 +264,16 @@ h2 {
   max-width: 100%;
   cursor: pointer;
 }
+/* Clear outline when a control is reached with the keyboard (Tab), for accessibility. */
 .chart-mount .vega-bind select:focus-visible,
 .chart-mount .vega-bind input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Tooltips use the page's body font */
+/* Chart tooltips (made by Vega) use the page's body font */
 #vg-tooltip-element { font-family: var(--font-body); font-size: 0.85rem; }
 
-/* ---------- Colour key (hero) ---------- */
+
+/* ---------- Colour key (hero) ----------
+   Explains the colour roles once, at the top, so every chart can be read the same way. */
 .colour-key {
   list-style: none;
   margin: 28px 0 0;
@@ -244,12 +287,15 @@ h2 {
   font-size: 0.92rem;
   color: var(--ink-2);
 }
-.colour-key-title { width: 100%; font-weight: 700; color: var(--ink); }
+.colour-key-title { width: 100%; font-weight: 700; color: var(--ink); }  /* full width = its own line */
 .colour-key li { display: flex; align-items: center; gap: 8px; }
+/* Each swatch's colour is passed in from the HTML as style="--c: var(--accent)" */
 .swatch { flex: 0 0 auto; width: 14px; height: 14px; border-radius: 3px; background: var(--c); }
-.swatch-ramp { width: 38px; background: linear-gradient(90deg, #cde2fb, #0d366b); }
+.swatch-ramp { width: 38px; background: linear-gradient(90deg, #cde2fb, #0d366b); }  /* light-to-dark blue */
 
-/* ---------- On-chart annotation ---------- */
+
+/* ---------- On-chart annotation ----------
+   A highlighted note attached to a chart (e.g. the MrBeast fact under the waffle). */
 .annotation {
   margin: 12px 0 0;
   padding: 10px 14px;
@@ -260,7 +306,9 @@ h2 {
   max-width: var(--measure);
 }
 
-/* ---------- Before / after panel (Act 5) ---------- */
+
+/* ---------- Before / after panel (Act 5) ----------
+   Two columns: what under-16s lost (orange = the focus) and what they kept (blue). */
 .before-after {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -276,15 +324,20 @@ h2 {
 .ba-col h3 { font-size: 1.1rem; font-weight: 600; margin: 0 0 10px; }
 .ba-col ul { list-style: none; margin: 0; padding: 0; }
 .ba-col li { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; }
+/* The round ✕ / ✓ icons: a fixed-size circle with the symbol centred inside (place-items: center) */
 .ba-icon { flex: 0 0 1.4em; height: 1.4em; border-radius: 50%; display: inline-grid; place-items: center; font-size: 0.8rem; font-weight: 700; color: #fff; }
 .ba-lost { border-top: 4px solid var(--accent); }
 .ba-lost .ba-icon { background: var(--accent); }
 .ba-kept { border-top: 4px solid var(--blue); }
 .ba-kept .ba-icon { background: var(--blue); }
 .ba-note { margin: 12px 0 0; font-size: 0.95rem; color: var(--ink-2); }
+/* grid-column 1 / -1 = span from the first to the last column, so the source sits under both */
 .before-after .chart-source { grid-column: 1 / -1; margin: 0; }
 
-/* ---------- Pending-data card ---------- */
+
+/* ---------- "Data pending" card ----------
+   Shown by main.js (renderPending) instead of a chart when a data file is missing.
+   Dashed border and faint stripes so it can't be mistaken for a real chart. */
 .pending {
   border: 1.5px dashed var(--axis);
   border-radius: 8px;
@@ -306,23 +359,29 @@ h2 {
   padding: 2px 8px;
   margin-bottom: 10px;
 }
+/* The label / value list: labels in the first column sized to fit ("max-content"), values in the rest */
 .pending dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
 .pending dt { font-weight: 700; color: var(--ink); }
 .pending dd { margin: 0; }
 .pending code { font-size: 0.88em; background: #f0efec; padding: 1px 5px; border-radius: 3px; }
 
+/* Message shown by main.js if a chart fails to draw */
 .chart-error { color: #a32d2d; font-size: 0.9rem; }
 
-/* ---------- About & sources ---------- */
+
+/* ---------- About, sources and footer ---------- */
 .about, .sources { padding: 64px 0; border-top: 1px solid var(--hairline); }
 .about { background: var(--surface); }
 
+/* Why / Who / What in three columns */
 .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
 .about-grid h3 { font-size: 1.1rem; margin-bottom: 8px; }
 .about-grid p { margin: 0; color: var(--ink-2); font-size: 0.97rem; }
 
 .source-list { max-width: 90ch; padding-left: 1.4em; margin: 0; }
+/* scroll-margin-top leaves a little space above a source when a link scrolls to it */
 .source-list li { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.55; scroll-margin-top: 24px; }
+/* :target = the source the reader just jumped to; highlight it so it's easy to find */
 .source-list li:target { background: #faeeda; border-radius: 4px; }
 
 .site-footer {
@@ -333,23 +392,29 @@ h2 {
 }
 .site-footer p { margin: 0 0 8px; max-width: 90ch; }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  .two-col, .about-grid, .before-after { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 520px) {
-  .wrap { padding: 0 16px; }
-  .chart-card { padding: 16px 12px 12px; }
-  .stat-strip { grid-template-columns: 1fr; }
-}
-
-/* ---------- Closing line (end of Part 5) ---------- */
+/* Closing line (end of Part 5): a heavier rule and larger text to mark the end of the story */
 .closing { margin-top: 8px; }
 .closing p {
   border-top: 3px solid var(--ink);
   padding-top: 14px;
   font-size: 1.15rem;
   line-height: 1.6;
+}
+
+
+/* ---------- Smaller screens (responsive design) ----------
+   Rules inside @media apply only when the window is at most that wide. They are last in the file
+   so they override the desktop rules above. Result: no sideways scrolling on a phone. */
+
+/* Tablets and small laptops: stats in 2 columns; side-by-side blocks stack into one column */
+@media (max-width: 900px) {
+  .stat-strip { grid-template-columns: repeat(2, 1fr); }
+  .two-col, .about-grid, .before-after { grid-template-columns: 1fr; }
+}
+
+/* Phones: tighter side margins and padding; stats in 1 column */
+@media (max-width: 520px) {
+  .wrap { padding: 0 16px; }
+  .chart-card { padding: 16px 12px 12px; }
+  .stat-strip { grid-template-columns: 1fr; }
 }

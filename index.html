@@ -1,19 +1,28 @@
 <!DOCTYPE html>
+<!-- index.html: the whole site is this one scrolling page.
+     It holds the words and an empty slot for each chart; js/main.js fills each slot with a chart
+     drawn from a spec in specs/ and a CSV in data/. Styling lives in css/style.css. -->
 <html lang="en-AU">
 <head>
   <meta charset="utf-8">
+  <!-- Use the device's real width so the layout adapts on phones instead of showing a shrunk desktop page -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Made for the Feed: Australia's YouTube Creators</title>
   <meta name="description" content="A data story about Australia's YouTube creators: how audiences moved online, who the biggest creators are, where their fans are, what children watch, and how the under-16 law changed things.">
   <meta name="author" content="Jun Hao Ng">
+  <!-- Fonts: Bricolage Grotesque for headings, Atkinson Hyperlegible (designed for legibility) for text and charts.
+       "preconnect" opens the connection to Google Fonts early so the text appears sooner. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Empty tab icon: stops the browser asking for a favicon.ico that doesn't exist (a 404 in the console) -->
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<!-- ===================== HERO =====================
+     Title, one-sentence summary (the "dek"), byline, key figures and the colour key. -->
 <header class="hero">
   <div class="wrap">
     <p class="kicker">Australian YouTube creators &middot; 2020&ndash;2026</p>
@@ -21,6 +30,7 @@
     <p class="dek">Australians now spend their screen time with people who film from their bedrooms, cars and backyards. This is the story of how the audience moved, who the creators are, where their fans live, what children watch, and how a new law redrew the line.</p>
     <p class="byline">By <span class="author">Jun Hao Ng</span> &middot; FIT3179 Data Visualisation 2 &middot; <time datetime="2026-10">October 2026</time></p>
 
+    <!-- Stat strip: four headline numbers that preview the story. Each one links to its source (the <sup> numbers). -->
     <ul class="stat-strip" aria-label="Key figures">
       <li class="stat">
         <span class="stat-value">91%</span>
@@ -40,6 +50,8 @@
       </li>
     </ul>
 
+    <!-- Colour key: explains the colour roles every chart follows (same values as THEME in js/main.js
+         and the CSS variables in css/style.css), plus the "Try it" label used on interactive charts. -->
     <ul class="colour-key" aria-label="How colour is used in every chart">
       <li class="colour-key-title">Reading the charts</li>
       <li><span class="swatch" style="--c: var(--accent)" aria-hidden="true"></span><span><strong>Orange</strong> marks what to look at: the story's focus, or what you've picked</span></li>
@@ -51,9 +63,12 @@
   </div>
 </header>
 
+<!-- Main content: five "acts" (sections) that tell the story in order, then About and Sources.
+     Each act = a short prose introduction followed by its chart cards. -->
 <main>
 
-  <!-- ===================== ACT 1 ===================== -->
+  <!-- ===================== ACT 1 =====================
+       The audience moved: adults now watch more online video, and YouTube overtook Netflix. Charts 1-2. -->
   <section class="act" id="act-1" aria-labelledby="act-1-title">
     <div class="wrap">
       <p class="act-num">Part 1</p>
@@ -63,6 +78,13 @@
         <p>The ranking below follows the eight most-used online video services each year. YouTube, in orange, overtook Netflix in 2023 and has stayed on top since.</p>
       </div>
 
+      <!-- CHART CARD: every chart on the page uses this same pattern.
+           data-spec      the chart spec main.js loads and draws (Vega-Lite JSON; the treemap is Vega)
+           data-requires  the data files main.js checks first; if one is missing it shows a "Data pending" card
+           data-idiom, data-columns, data-source  describe the chart; shown on the "Data pending" card if needed
+           figcaption     title (h3), how to read the chart, and a "Try it" line for the interaction
+           .chart-mount   empty on purpose: main.js draws the chart and its menus/switches in here
+           .chart-source  where the data comes from; <sup> numbers link to the Data sources list -->
       <figure class="chart-card" id="chart-1"
         data-spec="specs/01_bump_services.vl.json"
         data-requires="data/acma_services_by_year.csv"
@@ -99,7 +121,9 @@
     </div>
   </section>
 
-  <!-- ===================== ACT 2 ===================== -->
+  <!-- ===================== ACT 2 =====================
+       Meet the creators: what the top 40 make (treemap), how long their videos are, and where they live.
+       Ends on the map so "where creators live" leads into Act 3, "where their fans are". Charts 3-6. -->
   <section class="act" id="act-2" aria-labelledby="act-2-title">
     <div class="wrap">
       <p class="act-num">Part 2</p>
@@ -165,7 +189,8 @@
     </div>
   </section>
 
-  <!-- ===================== ACT 3 ===================== -->
+  <!-- ===================== ACT 3 =====================
+       Where the fans are: Google Trends search interest by state (tile maps) and by country (world map). Charts 7-8. -->
   <section class="act" id="act-3" aria-labelledby="act-3-title">
     <div class="wrap">
       <p class="act-num">Part 3</p>
@@ -211,7 +236,8 @@
     </div>
   </section>
 
-  <!-- ===================== ACT 4 ===================== -->
+  <!-- ===================== ACT 4 =====================
+       Made for kids?: how many children watch YouTube, what they watch by age, and boys vs girls. Charts 9-11. -->
   <section class="act" id="act-4" aria-labelledby="act-4-title">
     <div class="wrap">
       <p class="act-num">Part 4</p>
@@ -276,7 +302,8 @@
     </div>
   </section>
 
-  <!-- ===================== ACT 5 ===================== -->
+  <!-- ===================== ACT 5 =====================
+       The under-16 line: what the law changed (before/after panel) and the timeline of events. Chart 12. -->
   <section class="act" id="act-5" aria-labelledby="act-5-title">
     <div class="wrap">
       <p class="act-num">Part 5</p>
@@ -285,6 +312,8 @@
         <p>On 10 December 2025, Australia began enforcing a minimum age of 16 for social media accounts, and YouTube was included. By mid-December, about 4.7 million age-restricted accounts across platforms had been removed or restricted. eSafety's March 2026 update reported more than 310,000 further accounts blocked, while noting that many under-16s still had access.<sup><a href="#src-8">8</a></sup></p>
       </div>
 
+      <!-- Before/after panel: plain HTML, not a chart, because the change is a list of rules rather than numbers.
+           Orange column = what was lost (the focus), blue column = what is still allowed. -->
       <div class="before-after" role="group" aria-label="What changed on YouTube for under-16s on 10 December 2025">
         <div class="ba-col ba-lost">
           <h3>What under-16s lost on 10 December 2025</h3>
@@ -326,13 +355,15 @@
         <p class="chart-source">Sources: eSafety<sup><a href="#src-8">8</a></sup>; ACMA<sup><a href="#src-1">1</a></sup>; University of Canberra<sup><a href="#src-3">3</a></sup>; IAB Australia<sup><a href="#src-10">10</a></sup></p>
       </figure>
 
+      <!-- Closing line: ties the five parts together in one sentence -->
       <div class="prose closing">
         <p><strong>The story in one line.</strong> Australian adults moved to YouTube; its biggest local creators answered with gaming and Shorts; their fans spread from Tasmania to New Zealand; and children love the same gaming videos, none of them marked as made for kids. The under-16 law changed who can hold an account, not who can press play.</p>
       </div>
     </div>
   </section>
 
-  <!-- ===================== ABOUT ===================== -->
+  <!-- ===================== ABOUT =====================
+       Why the page exists, who it is for, and what data it uses (the brief's why / who / what). -->
   <section class="about" id="about" aria-labelledby="about-title">
     <div class="wrap">
       <h2 id="about-title">About this visualisation</h2>
@@ -353,7 +384,8 @@
     </div>
   </section>
 
-  <!-- ===================== SOURCES ===================== -->
+  <!-- ===================== SOURCES =====================
+       Numbered list; each <li id="src-N"> is the target of the <sup><a href="#src-N"> links in the text. -->
   <section class="sources" id="sources" aria-labelledby="sources-title">
     <div class="wrap">
       <h2 id="sources-title">Data sources</h2>
@@ -376,6 +408,7 @@
 
 </main>
 
+<!-- Footer: author, tools used and the AI-use statement -->
 <footer class="site-footer">
   <div class="wrap">
     <p><strong>Author:</strong> <span class="author">Jun Hao Ng</span>, Monash University (FIT3179), October 2026.</p>
@@ -384,6 +417,9 @@
   </div>
 </footer>
 
+<!-- Scripts go last so every chart card already exists when main.js looks for them.
+     Order matters: Vega draws charts, Vega-Lite compiles specs to Vega, vega-embed connects both to the page,
+     then main.js uses vegaEmbed. Exact versions are pinned so a new library release can't change the page. -->
 <script src="https://cdn.jsdelivr.net/npm/vega@5.33.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.23.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.29.0"></script>
