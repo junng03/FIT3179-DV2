@@ -117,8 +117,8 @@
               "Don't watch YouTube"
             ],
             "range": [
-              "#2a78d6",
-              "#aeada5"
+              "#ff0033",
+              "#cccccc"
             ]
           },
           "legend": {
@@ -153,7 +153,7 @@
         "baseline": "bottom",
         "fontSize": 13,
         "fontWeight": "bold",
-        "color": "#0b0b0b"
+        "color": "#0f0f0f"
       },
       "encoding": {
         "x": {

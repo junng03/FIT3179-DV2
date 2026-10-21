@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "Zoomable treemap of Australia's top 40 YouTube creators. Each rectangle is one channel, grouped by its main category (the YouTube category used most often across its 50 most recent uploads) and sized by subscribers or total views. Each category has a dark border. Gaming, the largest category, is orange. Click a category to zoom in: the view first zooms like a camera so that category fills the chart (the others slide off the edges), then cross-fades to a tidy full-size layout of its channels; click again to zoom back out. Source: YouTube Data API v3.",
+  "description": "Zoomable treemap of Australia's top 40 YouTube creators. Each rectangle is one channel, grouped by its main category (the YouTube category used most often across its 50 most recent uploads) and sized by subscribers or total views. Each category has a dark border. Gaming, the largest category, is red; the others are charcoal. Click a category to zoom in: the view first zooms like a camera so that category fills the chart (the others slide off the edges), then cross-fades to a tidy full-size layout of its channels; click again to zoom back out. Source: YouTube Data API v3.",
   "height": 460,
   "padding": 4,
   "autosize": "none",
@@ -538,7 +538,7 @@
             "signal": "zoomed ? '← Back to all categories   ·   showing ' + zoom_cat + ' only' : 'Click any category to zoom in'"
           },
           "fill": {
-            "signal": "zoomed ? '#a8431b' : '#52514e'"
+            "signal": "zoomed ? '#cc0000' : '#606060'"
           },
           "fontWeight": {
             "signal": "zoomed ? 'bold' : 'normal'"
@@ -594,7 +594,7 @@
                 "field": "cy1"
               },
               "fill": {
-                "value": "#f0efec"
+                "value": "#f2f2f2"
               },
               "opacity": {
                 "field": "fade"
@@ -635,7 +635,7 @@
                 "value": "bold"
               },
               "fill": {
-                "value": "#0b0b0b"
+                "value": "#0f0f0f"
               },
               "opacity": {
                 "field": "fade"
@@ -668,13 +668,13 @@
                 "field": "cy1"
               },
               "fill": {
-                "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+                "signal": "datum.category === 'Gaming' ? '#ff0033' : '#4d4d4d'"
               },
               "opacity": {
                 "field": "fade"
               },
               "stroke": {
-                "value": "#fcfcfb"
+                "value": "#ffffff"
               },
               "strokeWidth": {
                 "value": 1
@@ -688,7 +688,7 @@
             },
             "hover": {
               "stroke": {
-                "value": "#0b0b0b"
+                "value": "#0f0f0f"
               },
               "strokeWidth": {
                 "value": 2
@@ -790,7 +790,7 @@
                 "value": 0
               },
               "stroke": {
-                "value": "#52514e"
+                "value": "#606060"
               },
               "strokeWidth": {
                 "value": 1.5
@@ -826,7 +826,7 @@
                 "field": "y1"
               },
               "fill": {
-                "value": "#f0efec"
+                "value": "#f2f2f2"
               },
               "opacity": {
                 "signal": "fade_in"
@@ -864,7 +864,7 @@
                 "value": "bold"
               },
               "fill": {
-                "value": "#0b0b0b"
+                "value": "#0f0f0f"
               },
               "opacity": {
                 "signal": "fade_in"
@@ -894,13 +894,13 @@
                 "field": "y1"
               },
               "fill": {
-                "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+                "signal": "datum.category === 'Gaming' ? '#ff0033' : '#4d4d4d'"
               },
               "opacity": {
                 "signal": "fade_in"
               },
               "stroke": {
-                "value": "#fcfcfb"
+                "value": "#ffffff"
               },
               "strokeWidth": {
                 "value": 1
@@ -914,7 +914,7 @@
             },
             "hover": {
               "stroke": {
-                "value": "#0b0b0b"
+                "value": "#0f0f0f"
               },
               "strokeWidth": {
                 "value": 2
@@ -1014,7 +1014,7 @@
                 "value": 0
               },
               "stroke": {
-                "value": "#52514e"
+                "value": "#606060"
               },
               "strokeWidth": {
                 "value": 1.5

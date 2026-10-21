@@ -1,5 +1,5 @@
 /* style.css: the look of the whole page (Made for the Feed, FIT3179 DV2).
-   Light theme only. Colours follow a colour-blind-safe palette and the same colour roles as the
+   Light theme only: YouTube red on white, with charcoal and greys. Colours follow the same colour roles as the
    charts (see THEME in js/main.js), so the page and the charts look like one design.
    Order of this file: variables -> base -> hero -> acts -> chart cards -> chart controls ->
    colour key -> annotation -> before/after panel -> pending card -> about/sources -> phones. */
@@ -10,20 +10,23 @@
    Why: one change here updates the whole page, and it keeps the page matching the charts. */
 :root {
   color-scheme: light;    /* tell the browser this is a light page (form controls, scrollbars) */
-  --page: #f9f9f7;        /* page background */
-  --surface: #fcfcfb;     /* card background; also the chart background in THEME */
-  --ink: #0b0b0b;         /* main text */
-  --ink-2: #52514e;       /* secondary text (captions, labels) */
-  --muted: #898781;       /* least important text (sources, byline) */
-  --hairline: #e1e0d9;    /* thin borders and dividers */
-  --axis: #c3c2b7;        /* chart axes and input borders */
-  /* Colour roles, shared with the charts (see THEME in js/main.js) */
-  --accent: #eb6834;      /* orange: what to look at (the story's focus, or the reader's selection) */
-  --accent-ink: #a8431b;  /* darker orange for text on light backgrounds */
-  --blue: #2a78d6;        /* the data itself; ramp #cde2fb -> #0d366b means "more" */
-  --amber: #eda100;       /* the second group in a two-group comparison */
-  --context: #aeada5;     /* context: other, earlier or longer */
-  --nodata: #e8e7e1;      /* no data */
+  --page: #ffffff;        /* page background */
+  --surface: #ffffff;     /* card background; also the chart background in THEME */
+  --ink: #0f0f0f;         /* main text */
+  --ink-2: #606060;       /* secondary text (captions, labels) */
+  --muted: #909090;       /* least important text (sources, byline) */
+  --hairline: #e5e5e5;    /* thin borders and dividers */
+  --axis: #cccccc;        /* chart axes and input borders */
+  /* Colour roles, shared with the charts (see THEME in js/main.js): YouTube red and white */
+  --accent: #ff0033;      /* red: what to look at (YouTube, the story's focus, or the reader's selection) */
+  --accent-ink: #cc0000;  /* darker red for text on white, so it stays readable */
+  --data: #4d4d4d;        /* charcoal: ordinary data, and the other group in a comparison */
+  --second: #ff0033;      /* red: the second group in a two-group comparison (girls) */
+  --ramp-light: #fee0d2;  /* "more" ramp: light red ... */
+  --ramp-dark: #a50f15;   /* ... to deep red */
+  --context: #b3b3b3;     /* context: other, earlier or longer */
+  --nodata: #ececec;      /* no data */
+  --panel: #f8f8f8;       /* faint grey behind control bars and the colour key */
   --font-display: "Bricolage Grotesque", system-ui, sans-serif;  /* headings */
   --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;   /* text and charts; designed for legibility */
   --measure: 68ch;        /* max line length for reading text (about 68 characters is comfortable) */
@@ -56,8 +59,8 @@ body {
   padding: 0 24px;
 }
 
-a { color: var(--blue); text-underline-offset: 2px; }
-a:hover { color: #1c5cab; }
+a { color: var(--accent-ink); text-underline-offset: 2px; }
+a:hover { color: #990000; }
 
 /* Source numbers: small, and line-height 0 so they don't push lines of text apart. */
 sup { line-height: 0; font-size: 0.7em; }
@@ -71,7 +74,7 @@ sup a { text-decoration: none; padding: 0 1px; }
   background: var(--surface);
 }
 
-/* The small orange line above the title */
+/* The small red line above the title */
 .kicker {
   margin: 0 0 12px;
   font-family: var(--font-display);
@@ -202,13 +205,13 @@ h2 {
   font-size: 0.95rem;
   max-width: var(--measure);
 }
-/* The small orange "TRY IT" pill (border-radius 999px makes fully rounded ends). */
+/* The small red "TRY IT" pill (border-radius 999px makes fully rounded ends). */
 .try-it-label {
   display: inline-block;
   margin-right: 6px;
   padding: 1px 8px;
   border-radius: 999px;
-  background: #fdf3ee;
+  background: #fff0f0;
   color: var(--accent-ink);
   font-family: var(--font-display);
   font-weight: 600;
@@ -240,7 +243,7 @@ h2 {
   margin: 0 0 14px;
   padding: 10px 14px;
   width: 100%;
-  background: var(--page);
+  background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: 8px;
   font-family: var(--font-body);
@@ -253,7 +256,7 @@ h2 {
 .chart-mount .vega-bind-name { font-weight: 700; color: var(--ink); }   /* e.g. "Show:" */
 .chart-mount .vega-bind-radio { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; }
 .chart-mount .vega-bind-radio label { display: inline-flex; align-items: center; gap: 4px; margin: 0; cursor: pointer; }
-/* accent-color paints the selected radio button orange, the "your selection" colour */
+/* accent-color paints the selected radio button red, the "your selection" colour */
 .chart-mount .vega-bind input[type="radio"] { accent-color: var(--accent); margin: 0; cursor: pointer; }
 .chart-mount .vega-bind select {
   font: inherit;
@@ -287,7 +290,7 @@ h2 {
   gap: 8px 28px;
   border: 1px solid var(--hairline);
   border-radius: 8px;
-  background: var(--page);
+  background: var(--panel);
   font-size: 0.92rem;
   color: var(--ink-2);
 }
@@ -295,8 +298,31 @@ h2 {
 .colour-key li { display: flex; align-items: center; gap: 8px; }
 /* Each swatch's colour is passed in from the HTML as style="--c: var(--accent)" */
 .swatch { flex: 0 0 auto; width: 14px; height: 14px; border-radius: 3px; background: var(--c); }
-.swatch-ramp { width: 38px; background: linear-gradient(90deg, #cde2fb, #0d366b); }  /* light-to-dark blue */
+.swatch-ramp { width: 38px; background: linear-gradient(90deg, var(--ramp-light), var(--ramp-dark)); }  /* light-to-deep red */
 
+
+/* ---------- Split card (chart 9) ----------
+   A narrow chart on the left and its key figures on the right, so the card is balanced and
+   doesn't leave most of its width empty. Stacks into one column on small screens (see the end of the file). */
+.card-split {
+  display: grid;
+  grid-template-columns: auto 1fr;   /* the chart takes the width it needs; the side panel the rest */
+  gap: 40px;
+  align-items: center;
+}
+.card-split .chart-mount { width: auto; }
+.card-side { max-width: 46ch; }
+.side-stat { margin: 0 0 18px; padding-top: 10px; border-top: 3px solid var(--data); }
+.side-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.side-stat-label { display: block; color: var(--ink-2); font-size: 0.95rem; margin-top: 4px; }
+.card-side .annotation { margin-top: 6px; }
 
 /* ---------- On-chart annotation ----------
    A highlighted note attached to a chart (e.g. the MrBeast fact under the waffle). */
@@ -304,7 +330,7 @@ h2 {
   margin: 12px 0 0;
   padding: 10px 14px;
   border-left: 3px solid var(--accent);
-  background: #fdf3ee;
+  background: #fff0f0;
   color: var(--ink);
   font-size: 0.95rem;
   max-width: var(--measure);
@@ -312,7 +338,7 @@ h2 {
 
 
 /* ---------- Before / after panel (Act 5) ----------
-   Two columns: what under-16s lost (orange = the focus) and what they kept (blue). */
+   Two columns: what under-16s lost (red = the focus) and what they kept (charcoal). */
 .before-after {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -332,8 +358,8 @@ h2 {
 .ba-icon { flex: 0 0 1.4em; height: 1.4em; border-radius: 50%; display: inline-grid; place-items: center; font-size: 0.8rem; font-weight: 700; color: #fff; }
 .ba-lost { border-top: 4px solid var(--accent); }
 .ba-lost .ba-icon { background: var(--accent); }
-.ba-kept { border-top: 4px solid var(--blue); }
-.ba-kept .ba-icon { background: var(--blue); }
+.ba-kept { border-top: 4px solid var(--data); }
+.ba-kept .ba-icon { background: var(--data); }
 .ba-note { margin: 12px 0 0; font-size: 0.95rem; color: var(--ink-2); }
 /* grid-column 1 / -1 = span from the first to the last column, so the source sits under both */
 .before-after .chart-source { grid-column: 1 / -1; margin: 0; }
@@ -357,8 +383,8 @@ h2 {
   font-size: 0.78rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  background: #faeeda;
-  color: #633806;
+  background: #fff0f0;
+  color: #990000;
   border-radius: 4px;
   padding: 2px 8px;
   margin-bottom: 10px;
@@ -367,7 +393,7 @@ h2 {
 .pending dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
 .pending dt { font-weight: 700; color: var(--ink); }
 .pending dd { margin: 0; }
-.pending code { font-size: 0.88em; background: #f0efec; padding: 1px 5px; border-radius: 3px; }
+.pending code { font-size: 0.88em; background: #f2f2f2; padding: 1px 5px; border-radius: 3px; }
 
 /* Message shown by main.js if a chart fails to draw */
 .chart-error { color: #a32d2d; font-size: 0.9rem; }
@@ -386,7 +412,7 @@ h2 {
 /* scroll-margin-top leaves a little space above a source when a link scrolls to it */
 .source-list li { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.55; scroll-margin-top: 24px; }
 /* :target = the source the reader just jumped to; highlight it so it's easy to find */
-.source-list li:target { background: #faeeda; border-radius: 4px; }
+.source-list li:target { background: #fff0f0; border-radius: 4px; }
 
 .site-footer {
   padding: 40px 0 56px;
@@ -413,7 +439,7 @@ h2 {
 /* Tablets and small laptops: stats in 2 columns; side-by-side blocks stack into one column */
 @media (max-width: 900px) {
   .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  .two-col, .about-grid, .before-after { grid-template-columns: 1fr; }
+  .two-col, .about-grid, .before-after, .card-split { grid-template-columns: 1fr; }
 }
 
 /* Phones: tighter side margins and padding; stats in 1 column */

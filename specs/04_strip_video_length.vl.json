@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Jittered strip plot of the 50 most recent uploads from Australia's top 40 YouTube creators, grouped by YouTube category. A switch shows each video's views (the default), length or likes (all on log scales), and the categories are always ordered by median views (fewest to most). Orange = 3 minutes or shorter (likely Shorts); grey = longer. Black tick = median of the measure shown. clicking the legend shows only Shorts or only longer videos. Lengths retrieved 10 October 2026, views and likes 17 October 2026. Source: YouTube Data API v3. Hovering anywhere highlights the nearest video and shows its details in a line above the chart.",
+  "description": "Jittered strip plot of the 50 most recent uploads from Australia's top 40 YouTube creators, grouped by YouTube category. A switch shows each video's views (the default), length or likes (all on log scales), and the categories are always ordered by median views (fewest to most). Red = 3 minutes or shorter (likely Shorts); grey = longer. Black tick = median of the measure shown. clicking the legend shows only Shorts or only longer videos. Lengths retrieved 10 October 2026, views and likes 17 October 2026. Source: YouTube Data API v3. Hovering anywhere highlights the nearest video and shows its details in a line above the chart.",
   "width": "container",
   "height": 380,
   "data": {
@@ -178,8 +178,8 @@
               "Longer video"
             ],
             "range": [
-              "#eb6834",
-              "#aeada5"
+              "#ff0033",
+              "#b3b3b3"
             ]
           },
           "legend": {
@@ -214,7 +214,7 @@
           "condition": {
             "param": "hover_vid",
             "empty": false,
-            "value": "#0b0b0b"
+            "value": "#0f0f0f"
           },
           "value": null
         },
@@ -231,7 +231,7 @@
     {
       "mark": {
         "type": "tick",
-        "color": "#0b0b0b",
+        "color": "#0f0f0f",
         "thickness": 3,
         "size": 34
       },
@@ -288,7 +288,7 @@
         "dy": -14,
         "fontSize": 12,
         "fontWeight": "bold",
-        "color": "#0b0b0b"
+        "color": "#0f0f0f"
       },
       "encoding": {
         "x": {
@@ -322,7 +322,7 @@
         "baseline": "bottom",
         "dy": -14,
         "fontSize": 12,
-        "color": "#898781",
+        "color": "#909090",
         "fontStyle": "italic"
       },
       "encoding": {
@@ -368,7 +368,7 @@
         "align": "left",
         "baseline": "top",
         "fontWeight": "bold",
-        "color": "#0b0b0b"
+        "color": "#0f0f0f"
       },
       "encoding": {
         "x": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "Three-level drill-down. (1) World: where people search YouTube for Australian creators (Google Trends, 0-100, 100 = the place where that creator's share of searches was highest). (2) Click Australia: the Equal Earth projection animates to an Australia-centred view and the states are coloured the same way. (3) Click a state: a treemap of the top-40 creators whose documented home is in that state, sized by subscribers (Gaming orange, as in chart 3). The menu picks which of four creators' Google Trends scores colour the maps. '<- Back' or a double-click goes up one level. Only 12 of the 40 creators have a documented home city, so each state's treemap shows only those. Sources: Google Trends (YouTube Search, scripts/fetch_trends.py); YouTube Data API v3; home cities from data/creator_cities.csv, mapped to states in data/city_states.csv; Natural Earth via vega-datasets; ABS-derived state boundaries.",
+  "description": "Three-level drill-down. (1) World: where people search YouTube for Australian creators (Google Trends, 0-100, 100 = the place where that creator's share of searches was highest). (2) Click Australia: the Equal Earth projection animates to an Australia-centred view and the states are coloured the same way. (3) Click a state: a treemap of the top-40 creators whose documented home is in that state, sized by subscribers (Gaming red, as in chart 3). The menu picks which of four creators' Google Trends scores colour the maps. '<- Back' or a double-click goes up one level. Only 12 of the 40 creators have a documented home city, so each state's treemap shows only those. Sources: Google Trends (YouTube Search, scripts/fetch_trends.py); YouTube Data API v3; home cities from data/creator_cities.csv, mapped to states in data/city_states.csv; Natural Earth via vega-datasets; ABS-derived state boundaries.",
   "height": 520,
   "padding": 4,
   "autosize": "none",
@@ -284,6 +284,22 @@
         {
           "type": "filter",
           "expr": "datum.id === 36"
+        },
+        {
+          "type": "formula",
+          "expr": "geoCentroid('proj', datum)",
+          "as": "c"
+        }
+      ]
+    },
+    {
+      "name": "nz_score",
+      "description": "New Zealand's score for the chosen creator (for the world-view note).",
+      "source": "world_scores",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.iso_n3 === 554"
         }
       ]
     },
@@ -361,6 +377,25 @@
           "type": "formula",
           "as": "score",
           "expr": "creator === 'How Ridiculous' ? datum.hr : creator === 'LazarBeam' ? datum.lb : creator === 'Lachlan' ? datum.la : datum.bd"
+        }
+      ]
+    },
+    {
+      "name": "top_state",
+      "description": "The state with the biggest share of searching for the chosen creator (for the Australia-view note).",
+      "source": "state_scores",
+      "transform": [
+        {
+          "type": "aggregate",
+          "ops": [
+            "argmax"
+          ],
+          "fields": [
+            "score"
+          ],
+          "as": [
+            "top"
+          ]
         }
       ]
     },
@@ -663,8 +698,8 @@
         100
       ],
       "range": [
-        "#cde2fb",
-        "#0d366b"
+        "#fee0d2",
+        "#a50f15"
       ],
       "interpolate": "hcl"
     }
@@ -677,7 +712,7 @@
       "direction": "horizontal",
       "gradientLength": 200,
       "title": "Share of the place's YouTube searches (100 = highest place)",
-      "titleLimit": 320,
+      "titleLimit": 420,
       "encode": {
         "title": {
           "update": {
@@ -717,7 +752,7 @@
       "encode": {
         "update": {
           "fill": {
-            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#ececec'"
           },
           "fillOpacity": {
             "signal": "isValid(datum.s) ? 1 - 0.7 * e : 1"
@@ -726,7 +761,7 @@
             "signal": "1 - s_prog"
           },
           "stroke": {
-            "value": "#fcfcfb"
+            "value": "#ffffff"
           },
           "strokeWidth": {
             "value": 0.5
@@ -748,7 +783,7 @@
     },
     {
       "type": "shape",
-      "description": "Orange outline: Australia is the place to click. Fades out as the map zooms in.",
+      "description": "Black outline: Australia is the place to click. Fades out as the map zooms in.",
       "from": {
         "data": "australia_outline"
       },
@@ -759,7 +794,7 @@
             "value": 0
           },
           "stroke": {
-            "value": "#eb6834"
+            "value": "#0f0f0f"
           },
           "strokeWidth": {
             "value": 2.5
@@ -777,22 +812,64 @@
       ]
     },
     {
+      "type": "text",
+      "description": "World-view annotation, beside Australia: where the chosen creator took the biggest share of searching. Fades out as the map zooms in.",
+      "from": {
+        "data": "australia_outline"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.c[0] - 78"
+          },
+          "y": {
+            "signal": "datum.c[1] - 8"
+          },
+          "align": {
+            "value": "right"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "text": {
+            "signal": "['Biggest share of searching:', 'Australia (100), then', 'New Zealand (' + (length(data('nz_score')) ? data('nz_score')[0].score : '?') + ')']"
+          },
+          "lineHeight": {
+            "value": 16
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "value": "#0f0f0f"
+          },
+          "opacity": {
+            "signal": "1 - e"
+          }
+        }
+      }
+    },
+    {
       "type": "shape",
       "name": "states",
-      "description": "State choropleth, fading in as the map zooms into Australia. Click a state to open its treemap. The hovered state is brought to the front (zindex) so its orange outline isn't covered by its neighbours' borders.",
+      "description": "State choropleth, fading in as the map zooms into Australia. Click a state to open its treemap. The hovered state is brought to the front (zindex) so its black outline isn't covered by its neighbours' borders.",
       "from": {
         "data": "state_shapes"
       },
       "encode": {
         "update": {
           "fill": {
-            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#ececec'"
           },
           "opacity": {
             "signal": "e_detail"
           },
           "stroke": {
-            "value": "#fcfcfb"
+            "value": "#ffffff"
           },
           "strokeWidth": {
             "value": 1.2
@@ -809,7 +886,7 @@
         },
         "hover": {
           "stroke": {
-            "value": "#eb6834"
+            "value": "#0f0f0f"
           },
           "strokeWidth": {
             "value": 3
@@ -857,7 +934,7 @@
             "value": "bold"
           },
           "fill": {
-            "signal": "isValid(datum.s.score) && datum.s.score >= 55 ? '#ffffff' : '#0b0b0b'"
+            "signal": "isValid(datum.s.score) && datum.s.score >= 55 ? '#ffffff' : '#0f0f0f'"
           },
           "opacity": {
             "signal": "e_detail"
@@ -887,7 +964,7 @@
             "field": "by"
           },
           "stroke": {
-            "value": "#52514e"
+            "value": "#606060"
           },
           "strokeWidth": {
             "value": 1
@@ -920,10 +997,10 @@
             "value": 420
           },
           "fill": {
-            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#ececec'"
           },
           "stroke": {
-            "value": "#fcfcfb"
+            "value": "#ffffff"
           },
           "strokeWidth": {
             "value": 1.2
@@ -940,7 +1017,7 @@
         },
         "hover": {
           "stroke": {
-            "value": "#eb6834"
+            "value": "#0f0f0f"
           },
           "strokeWidth": {
             "value": 3
@@ -975,7 +1052,7 @@
             "value": "bold"
           },
           "fill": {
-            "value": "#0b0b0b"
+            "value": "#0f0f0f"
           },
           "opacity": {
             "signal": "e_detail"
@@ -1005,7 +1082,7 @@
             "signal": "height"
           },
           "fill": {
-            "value": "#fcfcfb"
+            "value": "#ffffff"
           },
           "opacity": {
             "signal": "s_prog"
@@ -1044,7 +1121,7 @@
             "value": 14
           },
           "fill": {
-            "value": "#52514e"
+            "value": "#606060"
           },
           "opacity": {
             "signal": "s_prog"
@@ -1074,7 +1151,7 @@
             "field": "y1"
           },
           "fill": {
-            "value": "#f0efec"
+            "value": "#f2f2f2"
           },
           "opacity": {
             "signal": "s_prog"
@@ -1106,7 +1183,7 @@
             "value": "bold"
           },
           "fill": {
-            "value": "#0b0b0b"
+            "value": "#0f0f0f"
           },
           "opacity": {
             "signal": "s_prog"
@@ -1117,7 +1194,7 @@
     {
       "type": "rect",
       "name": "state_cells",
-      "description": "One rectangle per creator based in the state; Gaming orange and other categories blue, as in chart 3. The creator picked in the menu gets a dark outline.",
+      "description": "One rectangle per creator based in the state; Gaming red and other categories charcoal, as in chart 3. The creator picked in the menu gets a dark outline.",
       "from": {
         "data": "state_leaves"
       },
@@ -1136,10 +1213,10 @@
             "field": "y1"
           },
           "fill": {
-            "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+            "signal": "datum.category === 'Gaming' ? '#ff0033' : '#4d4d4d'"
           },
           "stroke": {
-            "signal": "datum.channel === creator ? '#0b0b0b' : '#fcfcfb'"
+            "signal": "datum.channel === creator ? '#0f0f0f' : '#ffffff'"
           },
           "strokeWidth": {
             "signal": "datum.channel === creator ? 3 : 1"
@@ -1153,7 +1230,7 @@
         },
         "hover": {
           "stroke": {
-            "value": "#0b0b0b"
+            "value": "#0f0f0f"
           },
           "strokeWidth": {
             "value": 2
@@ -1235,6 +1312,42 @@
     },
     {
       "type": "text",
+      "description": "Australia-view annotation, top right: the state with the biggest share of searching for the chosen creator (found from the data).",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "width - 4"
+          },
+          "y": {
+            "signal": "header_h + 22"
+          },
+          "align": {
+            "value": "right"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "text": {
+            "signal": "length(data('top_state')) ? 'Biggest share of searching for ' + creator + ': ' + data('top_state')[0].top.state + ' (100)' : ''"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "value": "#0f0f0f"
+          },
+          "opacity": {
+            "signal": "e_detail"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
       "name": "header",
       "description": "Instruction line at the top; in the Australia and state views it is the link back up one level.",
       "encode": {
@@ -1252,10 +1365,10 @@
             "value": 12
           },
           "text": {
-            "signal": "level === 'world' ? 'Click Australia (outlined in orange) to zoom in' : level === 'australia' ? '← Back to the world   ·   Click a state (or the ACT square) to see the top creators based there' : '← Back to Australia   ·   ' + picked_state + ': ' + (length(data('state_summary')) && data('state_summary')[0].n > 0 ? data('state_summary')[0].n + ' of the top 40 creators, ' + format(data('state_summary')[0].subs / data('top40_total')[0].subs, '.0%') + ' of their combined subscribers' : 'no documented top-40 creators')"
+            "signal": "level === 'world' ? 'Click Australia (outlined in black) to zoom in' : level === 'australia' ? '← Back to the world   ·   Click a state (or the ACT square) to see the top creators based there' : '← Back to Australia   ·   ' + picked_state + ': ' + (length(data('state_summary')) && data('state_summary')[0].n > 0 ? data('state_summary')[0].n + ' of the top 40 creators, ' + format(data('state_summary')[0].subs / data('top40_total')[0].subs, '.0%') + ' of their combined subscribers' : 'no documented top-40 creators')"
           },
           "fill": {
-            "signal": "level === 'world' ? '#52514e' : '#a8431b'"
+            "signal": "level === 'world' ? '#606060' : '#cc0000'"
           },
           "fontWeight": {
             "signal": "level === 'world' ? 'normal' : 'bold'"

@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Butterfly (back-to-back bar) chart: share of boys and girls aged 6-13 who watch YouTube that watch each video category. Boys to the left in blue, girls to the right in amber. A switch changes the sort order; a second switch shows the difference (girls minus boys, in percentage points) as a single diverging bar per category. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
+  "description": "Butterfly (back-to-back bar) chart: share of boys and girls aged 6-13 who watch YouTube that watch each video category. Boys to the left in charcoal, girls to the right in red. A switch changes the sort order; a second switch shows the difference (girls minus boys, in percentage points) as a single diverging bar per category. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025.",
   "width": "container",
   "height": 380,
   "params": [
@@ -162,8 +162,8 @@
               "Girls"
             ],
             "range": [
-              "#2a78d6",
-              "#eda100"
+              "#4d4d4d",
+              "#ff0033"
             ]
           },
           "legend": null
@@ -216,7 +216,7 @@
           "format": ".0f"
         },
         "color": {
-          "value": "#52514e"
+          "value": "#606060"
         }
       }
     },
@@ -287,7 +287,7 @@
           "format": "+.0f"
         },
         "color": {
-          "value": "#52514e"
+          "value": "#606060"
         }
       }
     },
@@ -339,9 +339,9 @@
         "color": {
           "condition": {
             "test": "datum.side < 0",
-            "value": "#2a78d6"
+            "value": "#4d4d4d"
           },
-          "value": "#8f6200"
+          "value": "#cc0000"
         }
       }
     },
@@ -380,7 +380,7 @@
         "dx": 30,
         "fontStyle": "italic",
         "fontWeight": "bold",
-        "color": "#52514e"
+        "color": "#606060"
       },
       "encoding": {
         "x": {

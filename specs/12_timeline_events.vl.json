@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Annotated timeline of policy, research and industry events affecting Australian creators' audiences, November 2024 to September 2026. Policy events (the under-16 law) are orange, research blue, industry grey. Click an event type in the legend to show only those events. Sources: eSafety, ACMA, University of Canberra, IAB Australia.",
+  "description": "Annotated timeline of policy, research and industry events affecting Australian creators' audiences, November 2024 to September 2026. Policy events (the under-16 law) are red, research charcoal, industry grey. Click an event type in the legend to show only those events. Sources: eSafety, ACMA, University of Canberra, IAB Australia.",
   "width": "container",
   "height": 400,
   "data": {
@@ -17,7 +17,7 @@
     {
       "mark": {
         "type": "rule",
-        "color": "#c3c2b7",
+        "color": "#cccccc",
         "strokeWidth": 1.5
       },
       "encoding": {
@@ -49,7 +49,7 @@
         {
           "mark": {
             "type": "rule",
-            "color": "#eb6834",
+            "color": "#ff0033",
             "strokeWidth": 4,
             "opacity": 0.35
           },
@@ -78,7 +78,7 @@
             "type": "text",
             "dy": -12,
             "fontStyle": "italic",
-            "color": "#a8431b"
+            "color": "#cc0000"
           },
           "encoding": {
             "x": {
@@ -99,7 +99,7 @@
     {
       "mark": {
         "type": "rule",
-        "color": "#898781",
+        "color": "#909090",
         "strokeDash": [
           2,
           3
@@ -149,7 +149,7 @@
         "filled": true,
         "opacity": 1,
         "size": 140,
-        "stroke": "#fcfcfb",
+        "stroke": "#ffffff",
         "strokeWidth": 2,
         "cursor": "pointer"
       },
@@ -173,9 +173,9 @@
               "Industry"
             ],
             "range": [
-              "#eb6834",
-              "#2a78d6",
-              "#52514e"
+              "#ff0033",
+              "#4d4d4d",
+              "#b3b3b3"
             ]
           },
           "legend": {
@@ -245,7 +245,7 @@
           "field": "label"
         },
         "color": {
-          "value": "#0b0b0b"
+          "value": "#0f0f0f"
         },
         "opacity": {
           "condition": {
@@ -282,7 +282,7 @@
           "field": "label"
         },
         "color": {
-          "value": "#0b0b0b"
+          "value": "#0f0f0f"
         },
         "opacity": {
           "condition": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Bump chart: rank of the eight most-used online video services among Australian adults (used in the past 7 days), 2020-2025. The highlighted service (YouTube by default, or the one picked in the menu) is orange. A switch shows the share of adults instead of the rank. Source: ACMA, How we watch and listen to content (2026), data tables QF8.",
+  "description": "Bump chart: rank of the eight most-used online video services among Australian adults (used in the past 7 days), 2020-2025. The highlighted service (YouTube by default, or the one picked in the menu) is red. A switch shows the share of adults instead of the rank. Source: ACMA, How we watch and listen to content (2026), data tables QF8.",
   "width": "container",
   "height": 340,
   "padding": {
@@ -140,9 +140,9 @@
         "color": {
           "condition": {
             "test": "datum.service === focus_service",
-            "value": "#eb6834"
+            "value": "#ff0033"
           },
-          "value": "#c3c2b7"
+          "value": "#cccccc"
         },
         "strokeWidth": {
           "condition": [
@@ -165,7 +165,7 @@
         "type": "point",
         "filled": true,
         "size": 80,
-        "stroke": "#fcfcfb",
+        "stroke": "#ffffff",
         "strokeWidth": 2,
         "opacity": 1
       },
@@ -173,9 +173,9 @@
         "color": {
           "condition": {
             "test": "datum.service === focus_service",
-            "value": "#eb6834"
+            "value": "#ff0033"
           },
-          "value": "#aeada5"
+          "value": "#b3b3b3"
         },
         "tooltip": [
           {
@@ -214,7 +214,7 @@
           "field": "service"
         },
         "color": {
-          "value": "#52514e"
+          "value": "#606060"
         }
       }
     },
@@ -235,7 +235,7 @@
           "field": "service"
         },
         "color": {
-          "value": "#a8431b"
+          "value": "#cc0000"
         }
       }
     },
@@ -252,7 +252,7 @@
         "baseline": "bottom",
         "dy": -12,
         "fontWeight": "bold",
-        "color": "#a8431b",
+        "color": "#cc0000",
         "text": "YouTube overtakes Netflix"
       },
       "encoding": {}
@@ -266,7 +266,7 @@
       ],
       "mark": {
         "type": "rule",
-        "color": "#a8431b",
+        "color": "#cc0000",
         "strokeWidth": 1,
         "y2Offset": -11,
         "yOffset": -7

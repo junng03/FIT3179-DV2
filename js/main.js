@@ -13,12 +13,14 @@
 
 /* ---------- Shared chart styling ---------- */
 
-/* Colour roles, used the same way in every spec (and in css/style.css):
-     orange  #eb6834  what to look at: the story's focus, or what the reader selected
-     blue    #2a78d6  the data itself; the ramp #cde2fb -> #0d366b means "more"
-     amber   #eda100  the second group when two groups are compared (girls vs boys)
-     grey    #aeada5  context (other services, earlier year, longer videos)
-     light   #e8e7e1  no data
+/* Colour roles (YouTube red and white), used the same way in every spec and in css/style.css:
+     red       #ff0033  what to look at: YouTube, the story's focus, or what the reader selected
+                        (text in red uses the darker #cc0000 so it stays readable on white)
+     red ramp  #fee0d2 -> #a50f15  "more": the darker the red, the bigger the value (maps, heatmap)
+     charcoal  #4d4d4d  ordinary data, and the second group when two are compared (boys vs girls in red)
+     grey      #b3b3b3  context (other services, earlier year, longer videos)
+     light     #ececec  no data
+     black     #0f0f0f  hover outlines on the red maps, so they show against red
    All chart text is 12px Atkinson Hyperlegible; facet headers and in-chart titles are 13px bold. */
 
 /**
@@ -28,45 +30,45 @@
  */
 const THEME = {
   font: "Atkinson Hyperlegible, system-ui, sans-serif", // same body font as the page
-  background: "#fcfcfb",                                 // same as the chart cards (--surface)
+  background: "#ffffff",                                 // same as the chart cards (--surface)
   view: { stroke: null },                                // remove the default grey box around each plot
   padding: 4,
   axis: {
-    labelColor: "#52514e",
-    titleColor: "#52514e",
+    labelColor: "#606060",
+    titleColor: "#606060",
     labelFontSize: 12,
     titleFontSize: 12,
     titleFontWeight: "normal",
-    gridColor: "#e1e0d9",                                // light gridlines so the data stands out
-    domainColor: "#c3c2b7",
-    tickColor: "#c3c2b7"
+    gridColor: "#e5e5e5",                                // light gridlines so the data stands out
+    domainColor: "#cccccc",
+    tickColor: "#cccccc"
   },
   legend: {
-    labelColor: "#52514e",
-    titleColor: "#52514e",
+    labelColor: "#606060",
+    titleColor: "#606060",
     labelFontSize: 12,
     titleFontSize: 12,
     titleFontWeight: "normal",
     symbolType: "circle"
   },
   header: {                                              // panel titles in small multiples (chart 7)
-    labelColor: "#0b0b0b",
+    labelColor: "#0f0f0f",
     labelFontSize: 13,
     labelFontWeight: "bold",
     titleFontSize: 12
   },
   title: {                                               // in-chart titles (e.g. the waffle headline)
     font: "Atkinson Hyperlegible, system-ui, sans-serif",
-    color: "#0b0b0b",
+    color: "#0f0f0f",
     fontSize: 13,
     fontWeight: "bold",
     anchor: "start",
     offset: 12
   },
-  text: { font: "Atkinson Hyperlegible, system-ui, sans-serif", color: "#52514e", fontSize: 12 },
+  text: { font: "Atkinson Hyperlegible, system-ui, sans-serif", color: "#606060", fontSize: 12 },
   range: {                                               // fallback palettes if a spec doesn't set its own
-    category: ["#2a78d6", "#eda100", "#eb6834", "#aeada5"],
-    ramp: ["#cde2fb", "#0d366b"]
+    category: ["#ff0033", "#4d4d4d", "#b3b3b3"],
+    ramp: ["#fee0d2", "#a50f15"]
   }
 };
 

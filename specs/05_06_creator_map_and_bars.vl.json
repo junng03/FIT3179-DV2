@@ -68,8 +68,8 @@
           },
           "mark": {
             "type": "geoshape",
-            "fill": "#f0efec",
-            "stroke": "#c3c2b7",
+            "fill": "#f2f2f2",
+            "stroke": "#cccccc",
             "strokeWidth": 0.8
           }
         },
@@ -118,7 +118,7 @@
           ],
           "mark": {
             "type": "circle",
-            "stroke": "#fcfcfb",
+            "stroke": "#ffffff",
             "strokeWidth": 1.5,
             "cursor": "pointer"
           },
@@ -145,7 +145,7 @@
                 "format": "~s",
                 "orient": "bottom",
                 "direction": "horizontal",
-                "symbolFillColor": "#2a78d6",
+                "symbolFillColor": "#4d4d4d",
                 "symbolOpacity": 0.6,
                 "symbolStrokeWidth": 0,
                 "labelExpr": "replace(datum.label, 'G', 'B')",
@@ -161,9 +161,9 @@
               "condition": {
                 "param": "pick",
                 "empty": false,
-                "value": "#eb6834"
+                "value": "#ff0033"
               },
-              "value": "#2a78d6"
+              "value": "#4d4d4d"
             },
             "opacity": {
               "value": 0.8
@@ -263,7 +263,7 @@
             "align": "left",
             "baseline": "middle",
             "fontSize": 12,
-            "color": "#0b0b0b",
+            "color": "#0f0f0f",
             "dx": {
               "expr": "datum.radius + 4"
             },
@@ -341,14 +341,14 @@
             {
               "param": "pick",
               "empty": false,
-              "value": "#eb6834"
+              "value": "#ff0033"
             },
             {
               "test": "!isValid(datum.lat)",
-              "value": "#aeada5"
+              "value": "#b3b3b3"
             }
           ],
-          "value": "#2a78d6"
+          "value": "#4d4d4d"
         },
         "tooltip": [
           {
@@ -382,13 +382,13 @@
       },
       "title": {
         "text": [
-          "Blue: shown on the map  ·  grey: home city not documented",
-          "Orange: the city you picked"
+          "Charcoal: shown on the map  ·  grey: home city not documented",
+          "Red: the city you picked"
         ],
         "anchor": "start",
         "fontSize": 12,
         "fontWeight": "normal",
-        "color": "#52514e",
+        "color": "#606060",
         "offset": 10,
         "lineHeight": 16
       }

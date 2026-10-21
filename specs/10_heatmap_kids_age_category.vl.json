@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Heatmap: share of Australian children who watch YouTube that watch each of the five most popular video categories, for ages 6-9, ages 10-13 and all 6-13 year olds. Darker = larger share. Roy Morgan publishes only the top categories for each age group, so some cells are marked 'not published'; Gaming is the #1 category in every age group but its share by age is not published. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025. Hovering a category outlines its row in orange.",
+  "description": "Heatmap: share of Australian children who watch YouTube that watch each of the five most popular video categories, for ages 6-9, ages 10-13 and all 6-13 year olds. Darker = larger share. Roy Morgan publishes only the top categories for each age group, so some cells are marked 'not published'; Gaming is the #1 category in every age group but its share by age is not published. Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025. Hovering a category outlines its row in black.",
   "width": "container",
   "height": 300,
   "data": {
@@ -65,8 +65,8 @@
         "type": "rect",
         "cornerRadius": 2,
         "strokeWidth": 3,
-        "fill": "#e8e7e1",
-        "stroke": "#fcfcfb"
+        "fill": "#ececec",
+        "stroke": "#ffffff"
       },
       "encoding": {
         "tooltip": [
@@ -103,7 +103,7 @@
         "type": "rect",
         "cornerRadius": 2,
         "strokeWidth": 3,
-        "stroke": "#fcfcfb"
+        "stroke": "#ffffff"
       },
       "encoding": {
         "color": {
@@ -116,8 +116,8 @@
               60
             ],
             "range": [
-              "#cde2fb",
-              "#0d366b"
+              "#fee0d2",
+              "#a50f15"
             ]
           },
           "legend": {
@@ -163,23 +163,23 @@
           "condition": [
             {
               "test": "!isValid(datum.pct)",
-              "value": "#52514e"
+              "value": "#606060"
             },
             {
               "test": "datum.pct >= 38",
               "value": "#ffffff"
             }
           ],
-          "value": "#0b0b0b"
+          "value": "#0f0f0f"
         }
       }
     },
     {
-      "description": "Hover highlight, drawn as its own top layer: one orange outline round the whole hovered row. (Drawn on the cells themselves, the neighbouring cells' white borders painted over it.)",
+      "description": "Hover highlight, drawn as its own top layer: one black outline round the whole hovered row. (Drawn on the cells themselves, the neighbouring cells' white borders painted over it.)",
       "mark": {
         "type": "rect",
         "fillOpacity": 0,
-        "stroke": "#eb6834",
+        "stroke": "#0f0f0f",
         "strokeWidth": 3,
         "cornerRadius": 2
       },
@@ -202,5 +202,14 @@
         }
       ]
     }
-  ]
+  ],
+  "title": {
+    "text": "Gaming was #1 at every age. Ages 6–9 also leaned to animation and animals; ages 10–13 to comedy",
+    "anchor": "start",
+    "fontSize": 12,
+    "fontWeight": "normal",
+    "fontStyle": "italic",
+    "color": "#606060",
+    "offset": 30
+  }
 }

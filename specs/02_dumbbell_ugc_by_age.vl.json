@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Vertical dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the 7 days before the survey, 2024 (grey) vs 2025 (orange). Age groups run left to right, so each line reads as a drop from 2024 down to 2025. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
+  "description": "Vertical dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the 7 days before the survey, 2024 (grey) vs 2025 (red). Age groups run left to right, so each line reads as a drop from 2024 down to 2025. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
   "width": "container",
   "height": 360,
   "data": {
@@ -111,7 +111,7 @@
     {
       "mark": {
         "type": "rule",
-        "color": "#c3c2b7",
+        "color": "#cccccc",
         "strokeWidth": 4
       },
       "encoding": {
@@ -131,7 +131,7 @@
         "type": "circle",
         "size": 170,
         "opacity": 1,
-        "stroke": "#fcfcfb",
+        "stroke": "#ffffff",
         "strokeWidth": 1.5
       },
       "encoding": {
@@ -145,8 +145,8 @@
               "2025"
             ],
             "range": [
-              "#aeada5",
-              "#eb6834"
+              "#b3b3b3",
+              "#ff0033"
             ]
           },
           "legend": {
@@ -187,7 +187,7 @@
         "align": "center",
         "baseline": "top",
         "dy": 12,
-        "color": "#a8431b",
+        "color": "#cc0000",
         "fontWeight": "bold"
       },
       "encoding": {
@@ -209,7 +209,7 @@
         "align": "center",
         "baseline": "bottom",
         "dy": -12,
-        "color": "#898781"
+        "color": "#909090"
       },
       "encoding": {
         "text": {
@@ -239,7 +239,7 @@
         "align": "left",
         "baseline": "middle",
         "dx": 12,
-        "color": "#52514e"
+        "color": "#606060"
       },
       "encoding": {
         "y": {
