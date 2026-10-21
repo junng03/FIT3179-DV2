@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Waffle chart (10 x 10): out of every 100 Australian children, how many watch YouTube. A switch shows all 6-13 year olds (89), ages 6-7 (84) or ages 8-13 (91). Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129.",
+  "description": "Waffle chart (10 x 10): out of every 100 Australian children, how many watch YouTube. A switch shows all 6-13 year olds (89), ages 6-7 (84) or ages 8-13 (91). Source: Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129. Squares fill from the top-left with the children who watched YouTube, so the 'didn't watch' squares sit at the bottom.",
   "width": 300,
   "height": 300,
   "padding": {
@@ -41,6 +41,10 @@
       "filter": "datum.age_group === age_pick"
     },
     {
+      "calculate": "datum.group === 'Watch YouTube' ? 'Watched YouTube' : \"Didn't watch YouTube\"",
+      "as": "group_label"
+    },
+    {
       "calculate": "sequence(0, datum.pct)",
       "as": "unit"
     },
@@ -59,7 +63,7 @@
       "sort": [
         {
           "field": "order",
-          "order": "descending"
+          "order": "ascending"
         },
         {
           "field": "unit",
@@ -120,13 +124,14 @@
           "legend": {
             "orient": "bottom",
             "direction": "horizontal",
-            "symbolType": "square"
+            "symbolType": "square",
+            "labelExpr": "datum.label === 'Watch YouTube' ? 'Watched YouTube' : \"Didn't watch YouTube\""
           }
         },
         "tooltip": [
           {
-            "field": "group",
-            "title": "Children"
+            "field": "group_label",
+            "title": "Children aged 6-13, April-December 2025"
           },
           {
             "field": "pct",

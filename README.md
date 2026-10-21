@@ -46,12 +46,12 @@ Rule: real, published data only. Never type in an estimate. Raw downloads are no
 | # | Chart (idiom) | File | Where it comes from | Status |
 |---|---|---|---|---|
 | 1 | Bump chart (highlight menu; rank / share switch) | `acma_services_by_year.csv` | ACMA data tables QF8, 2020-2025 (`scripts/clean_acma.py`) | **Done** |
-| 2 | Dumbbell (sort switch) | `acma_ugc_by_age.csv` | ACMA data tables QF4 by age, 2024 vs 2025 (`scripts/clean_acma.py`) | **Done** |
+| 2 | Vertical dumbbell (change labels) | `acma_ugc_by_age.csv` | ACMA data tables QF4 by age, 2024 vs 2025 (`scripts/clean_acma.py`) | **Done** |
 | 3 | Zoomable treemap (Vega; click to zoom, size switch) | `creators.csv` | `scripts/build_creators.py` (needs `YT_API_KEY`); main category = most-used YouTube category in the 50 latest uploads | **Done** |
-| 4 | Strip plot (show length / views / likes, sort switch, creator menu, legend filter) | `videos.csv` | Same; 50 latest uploads per creator, Short = 180 s or less; views and likes added by `scripts/add_video_stats.py` (17 Oct 2026) | **Done** |
-| 5-6 | Symbol map + bar chart (linked click, measure switch) | `creators.csv` | Same; cities from `creator_cities.csv` | **Done** (12 of 40 have a sourced city) |
+| 4 | Strip plot (views by default; show length / views / likes; categories ordered by median views; nearest-video hover, legend filter, median annotation) | `videos.csv` | Same; 50 latest uploads per creator, Short = 180 s or less; views and likes added by `scripts/add_video_stats.py` (17 Oct 2026) | **Done** |
+| 5-6 | Symbol map + bar chart (linked click, city labels, colour key) | `creators.csv` | Same; cities from `creator_cities.csv` | **Done** (12 of 40 have a sourced city) |
 | 7 | Tile grid map (hover links the 4 maps) | `trends_state.csv` + `state_tiles.csv` | `scripts/fetch_trends.py` (Google Trends topics, YouTube Search, AU, 12 months); 0 = too little volume, stored blank | **Done** |
-| 8 | World choropleth (all-four average or one creator, Asia-Pacific zoom) | `trends_world.csv` | `scripts/fetch_trends.py` (worldwide); dropdown options in the spec match the 4 creators | **Done** |
+| 8 | Drill-down (Vega): world choropleth → click Australia → state choropleth → click a state → treemap of its creators (one creator at a time) | `trends_world.csv`, `trends_state.csv`, `state_tiles.csv`, `creators.csv`, `city_states.csv` | `scripts/fetch_trends.py` (worldwide and by state); home cities from `creator_cities.csv`, mapped to states in `city_states.csv`; creator menu options in the spec match the 4 creators | **Done** |
 | 9 | Waffle chart (age switch) | `kids_youtube_reach.csv` | Roy Morgan (2026): all 6-13, 6-7 and 8-13 | **Done** |
 | 10 | Heatmap (row hover) | `kids_age_category.csv` | Roy Morgan (2026): ages 6-9 and 10-13 (top categories only) + all 6-13; unpublished cells left blank | **Done** |
 | 11 | Butterfly (sort and difference switches) | `kids_category_by_gender.csv` | Roy Morgan (2026), 12 categories; base = boys/girls 6-13 who watch YouTube | **Done** |

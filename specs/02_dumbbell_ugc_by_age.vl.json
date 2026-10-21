@@ -1,22 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the past 7 days, 2024 (grey) vs 2025 (orange). A switch orders the age groups by age or by the size of the drop. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
+  "description": "Vertical dumbbell chart: share of each adult age group who watched user-generated or short-form online video (e.g. YouTube, TikTok, Instagram) in the 7 days before the survey, 2024 (grey) vs 2025 (orange). Age groups run left to right, so each line reads as a drop from 2024 down to 2025. Source: ACMA, How we watch and listen to content (2026), data tables QF4.",
   "width": "container",
-  "height": 300,
-  "params": [
-    {
-      "name": "order_by",
-      "value": "Age",
-      "bind": {
-        "input": "radio",
-        "options": [
-          "Age",
-          "Biggest drop"
-        ],
-        "name": "Order by: "
-      }
-    }
-  ],
+  "height": 360,
   "data": {
     "url": "data/acma_ugc_by_age.csv",
     "format": {
@@ -66,7 +52,7 @@
       "as": "age_index"
     },
     {
-      "calculate": "order_by === 'Age' ? datum.age_index : datum.change",
+      "calculate": "datum.age_index",
       "as": "sort_key"
     },
     {
@@ -93,7 +79,7 @@
     }
   ],
   "encoding": {
-    "y": {
+    "x": {
       "field": "y_key",
       "type": "ordinal",
       "title": null,
@@ -102,13 +88,14 @@
         "domain": false,
         "ticks": false,
         "labelPadding": 8,
+        "labelAngle": 0,
         "labelExpr": "split(datum.value, '|')[1]"
       }
     },
-    "x": {
+    "y": {
       "field": "pct",
       "type": "quantitative",
-      "title": "Adults who watched in the past 7 days (%)",
+      "title": "Adults who watched in the 7 days before the survey (%)",
       "scale": {
         "domain": [
           0,
@@ -125,15 +112,15 @@
       "mark": {
         "type": "rule",
         "color": "#c3c2b7",
-        "strokeWidth": 3
+        "strokeWidth": 4
       },
       "encoding": {
-        "x": {
+        "y": {
           "aggregate": "min",
           "field": "pct",
           "type": "quantitative"
         },
-        "x2": {
+        "y2": {
           "aggregate": "max",
           "field": "pct"
         }
@@ -178,7 +165,7 @@
           },
           {
             "field": "pct",
-            "title": "Watched in past 7 days (%)",
+            "title": "Watched in the 7 days before the survey (%)",
             "format": ".0f"
           },
           {
@@ -197,8 +184,9 @@
       ],
       "mark": {
         "type": "text",
-        "align": "right",
-        "dx": -12,
+        "align": "center",
+        "baseline": "top",
+        "dy": 12,
         "color": "#a8431b",
         "fontWeight": "bold"
       },
@@ -218,8 +206,9 @@
       ],
       "mark": {
         "type": "text",
-        "align": "left",
-        "dx": 12,
+        "align": "center",
+        "baseline": "bottom",
+        "dy": -12,
         "color": "#898781"
       },
       "encoding": {
@@ -227,6 +216,38 @@
           "field": "pct",
           "type": "quantitative",
           "format": ".0f"
+        }
+      }
+    },
+    {
+      "description": "The change, in percentage points, beside each line (one label per age group).",
+      "transform": [
+        {
+          "filter": "datum.year === 2025"
+        },
+        {
+          "calculate": "(datum.pct_2024 + datum.pct_2025) / 2",
+          "as": "mid"
+        },
+        {
+          "calculate": "datum.change === 0 ? 'no change' : format(datum.change, '+.1f') + ' pts'",
+          "as": "change_label"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 12,
+        "color": "#52514e"
+      },
+      "encoding": {
+        "y": {
+          "field": "mid",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "change_label"
         }
       }
     }

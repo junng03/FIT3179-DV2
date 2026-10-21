@@ -194,7 +194,8 @@ h2 {
 }
 .two-col .chart-card { margin: 0; }
 
-/* "Try it" line: the same cue on every interactive chart, so readers learn to look for it. */
+/* "Try it" line: the same cue on every chart you can click or hover, so readers learn to look for it.
+   Charts whose only interaction is the menus and switches above them don't need one. */
 .try-it {
   margin: -8px 0 16px;
   color: var(--ink-2);
@@ -268,8 +269,11 @@ h2 {
 .chart-mount .vega-bind select:focus-visible,
 .chart-mount .vega-bind input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Chart tooltips (made by Vega) use the page's body font */
-#vg-tooltip-element { font-family: var(--font-body); font-size: 0.85rem; }
+/* Chart tooltips (made by Vega) use the page's body font.
+   pointer-events: none lets clicks pass through a tooltip to the chart underneath. Without it, a
+   tooltip left on screen after a click changes the view (e.g. in the drill-down map) can sit on top
+   of the next thing the reader wants to click and swallow the click. */
+#vg-tooltip-element { font-family: var(--font-body); font-size: 0.85rem; pointer-events: none; }
 
 
 /* ---------- Colour key (hero) ----------

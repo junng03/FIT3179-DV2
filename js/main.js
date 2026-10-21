@@ -5,7 +5,7 @@
    <div class="chart-mount"> where the chart goes. This file:
      1. finds every chart card,
      2. checks that the card's data files exist and contain data,
-     3. loads the card's spec (Vega-Lite, or Vega for the treemap) and draws it with vegaEmbed.
+     3. loads the card's spec (Vega-Lite, or Vega for the treemap and drill-down map) and draws it with vegaEmbed.
    If a data file is missing or empty, a "Data pending" card is shown instead, naming the file,
    columns and source it needs, so no values are ever invented to fill the gap.
    All chart logic lives in the spec files in specs/; this file only loads and draws them. */
@@ -183,9 +183,17 @@ async function loadChart(card) {
       return r.json();
     });
     // vegaEmbed reads the spec's $schema: a Vega-Lite spec is compiled to Vega first, a Vega spec
-    // (the treemap) is used as it is. It then loads the spec's CSV files and draws the chart,
+    // (the treemap, the drill-down map) is used as it is. It then loads the spec's CSV files and draws the chart,
     // plus any menus or switches the spec defines, inside the mount div.
     await vegaEmbed(mount, spec, EMBED_OPTIONS);
+
+    // A click often changes what the chart shows (e.g. the drill-down map opens a new level), which
+    // can leave the old tooltip floating over the new view until the mouse moves. Hide it on click;
+    // Vega shows the right tooltip again as soon as the mouse moves.
+    mount.addEventListener("click", () => {
+      const tip = document.getElementById("vg-tooltip-element");
+      if (tip) tip.classList.remove("visible");
+    });
   } catch (err) {
     console.error(card.id, err);              // full details for debugging (F12 -> Console)
     mount.innerHTML = `<p class="chart-error">This chart could not be drawn: ${escapeHtml(err.message)}</p>`;

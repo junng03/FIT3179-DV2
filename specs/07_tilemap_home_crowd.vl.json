@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Tile grid map as small multiples: relative YouTube search interest in four Australian creators by state and territory over the past 12 months. One equal-sized square per state, so the ACT is as visible as WA. 100 = the state where that creator's share of searches was highest. Hovering a state outlines it in orange in all four maps. Source: Google Trends (YouTube Search), retrieved by the author with scripts/fetch_trends.py. Grey tiles: too little search volume for Google to score.",
+  "description": "Tile grid map as small multiples: the share of each state's YouTube searches that went to in four Australian creators by state and territory over the past 12 months. One equal-sized square per state, so the ACT is as visible as WA. 100 = the state where that creator's share of searches was highest. Hovering a state outlines it in orange in all four maps. Source: Google Trends (YouTube Search), retrieved by the author with scripts/fetch_trends.py. Grey tiles: too little search volume for Google to score.",
   "data": {
     "url": "data/trends_state.csv",
     "format": {
@@ -75,7 +75,8 @@
           "cornerRadius": 3,
           "strokeWidth": 3,
           "fill": "#e8e7e1",
-          "cursor": "pointer"
+          "cursor": "pointer",
+          "stroke": "#fcfcfb"
         },
         "encoding": {
           "tooltip": [
@@ -89,17 +90,9 @@
             },
             {
               "field": "tooltip_value",
-              "title": "Relative search interest (0-100)"
+              "title": "Share of the state's searches (100 = highest state)"
             }
-          ],
-          "stroke": {
-            "condition": {
-              "param": "hover_state",
-              "empty": false,
-              "value": "#eb6834"
-            },
-            "value": "#fcfcfb"
-          }
+          ]
         },
         "params": [
           {
@@ -120,13 +113,14 @@
           "type": "rect",
           "cornerRadius": 3,
           "strokeWidth": 3,
-          "cursor": "pointer"
+          "cursor": "pointer",
+          "stroke": "#fcfcfb"
         },
         "encoding": {
           "color": {
             "field": "interest",
             "type": "quantitative",
-            "title": "Relative search interest (100 = highest state)",
+            "title": "Share of the state's YouTube searches (100 = highest state)",
             "scale": {
               "domain": [
                 0,
@@ -155,17 +149,9 @@
             },
             {
               "field": "tooltip_value",
-              "title": "Relative search interest (0-100)"
+              "title": "Share of the state's searches (100 = highest state)"
             }
-          ],
-          "stroke": {
-            "condition": {
-              "param": "hover_state",
-              "empty": false,
-              "value": "#eb6834"
-            },
-            "value": "#fcfcfb"
-          }
+          ]
         },
         "transform": [
           {
@@ -196,6 +182,24 @@
             "value": "#0b0b0b"
           }
         }
+      },
+      {
+        "description": "Hover highlight, drawn as its own top layer: an orange outline round the hovered state in all four maps. (Drawn on the tiles themselves, the neighbouring tiles' white borders painted over it.)",
+        "mark": {
+          "type": "rect",
+          "fillOpacity": 0,
+          "stroke": "#eb6834",
+          "strokeWidth": 3,
+          "cornerRadius": 3
+        },
+        "transform": [
+          {
+            "filter": {
+              "param": "hover_state",
+              "empty": false
+            }
+          }
+        ]
       }
     ],
     "encoding": {
@@ -226,5 +230,14 @@
         }
       }
     }
+  },
+  "title": {
+    "text": "A darker square means a bigger share of that state's searching, not a bigger share of the creator's audience",
+    "anchor": "start",
+    "fontSize": 12,
+    "fontWeight": "normal",
+    "fontStyle": "italic",
+    "color": "#52514e",
+    "offset": 14
   }
 }

@@ -65,7 +65,8 @@
         "type": "rect",
         "cornerRadius": 2,
         "strokeWidth": 3,
-        "fill": "#e8e7e1"
+        "fill": "#e8e7e1",
+        "stroke": "#fcfcfb"
       },
       "encoding": {
         "tooltip": [
@@ -81,15 +82,7 @@
             "field": "tooltip_value",
             "title": "Watch this category"
           }
-        ],
-        "stroke": {
-          "condition": {
-            "param": "hover_cat",
-            "empty": false,
-            "value": "#eb6834"
-          },
-          "value": "#fcfcfb"
-        }
+        ]
       },
       "params": [
         {
@@ -109,7 +102,8 @@
       "mark": {
         "type": "rect",
         "cornerRadius": 2,
-        "strokeWidth": 3
+        "strokeWidth": 3,
+        "stroke": "#fcfcfb"
       },
       "encoding": {
         "color": {
@@ -146,15 +140,7 @@
             "field": "tooltip_value",
             "title": "Watch this category"
           }
-        ],
-        "stroke": {
-          "condition": {
-            "param": "hover_cat",
-            "empty": false,
-            "value": "#eb6834"
-          },
-          "value": "#fcfcfb"
-        }
+        ]
       },
       "transform": [
         {
@@ -187,6 +173,34 @@
           "value": "#0b0b0b"
         }
       }
+    },
+    {
+      "description": "Hover highlight, drawn as its own top layer: one orange outline round the whole hovered row. (Drawn on the cells themselves, the neighbouring cells' white borders painted over it.)",
+      "mark": {
+        "type": "rect",
+        "fillOpacity": 0,
+        "stroke": "#eb6834",
+        "strokeWidth": 3,
+        "cornerRadius": 2
+      },
+      "encoding": {
+        "x": {
+          "value": 0
+        },
+        "x2": {
+          "value": {
+            "expr": "width"
+          }
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "param": "hover_cat",
+            "empty": false
+          }
+        }
+      ]
     }
   ]
 }

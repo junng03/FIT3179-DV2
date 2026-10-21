@@ -4,7 +4,8 @@
   "width": "container",
   "height": 340,
   "padding": {
-    "right": 130
+    "right": 130,
+    "top": 22
   },
   "params": [
     {
@@ -102,7 +103,7 @@
       },
       "axis": {
         "title": {
-          "expr": "measure === 'Rank' ? 'Rank (1 = most used)' : 'Adults who used it in the past week (%)'"
+          "expr": "measure === 'Rank' ? 'Rank (1 = most used)' : 'Adults who used it in the 7 days before the survey (%)'"
         },
         "tickMinStep": 1,
         "format": "d",
@@ -187,7 +188,7 @@
           },
           {
             "field": "pct",
-            "title": "Adults using it in the past week (%)",
+            "title": "Adults who used it in the 7 days before the survey (%)",
             "format": ".0f"
           },
           {
@@ -235,6 +236,44 @@
         },
         "color": {
           "value": "#a8431b"
+        }
+      }
+    },
+    {
+      "description": "Annotation: the moment YouTube overtook Netflix (2023). It follows YouTube's point in both the Rank and Share views.",
+      "transform": [
+        {
+          "filter": "datum.service === 'YouTube' && datum.year === 2023"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "bottom",
+        "dy": -12,
+        "fontWeight": "bold",
+        "color": "#a8431b",
+        "text": "YouTube overtakes Netflix"
+      },
+      "encoding": {}
+    },
+    {
+      "description": "Small tick from the annotation down to YouTube's 2023 point.",
+      "transform": [
+        {
+          "filter": "datum.service === 'YouTube' && datum.year === 2023"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "color": "#a8431b",
+        "strokeWidth": 1,
+        "y2Offset": -11,
+        "yOffset": -7
+      },
+      "encoding": {
+        "y2": {
+          "field": "y_value"
         }
       }
     }

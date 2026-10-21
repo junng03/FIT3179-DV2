@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Proportional symbol map of where Australia's top 40 YouTube creators are based (one circle per documented home city, area = combined subscribers, views or videos of the creators based there), linked to a bar chart of the 15 largest channels by the same measure. Click a city or a bar to highlight that city in both views; double-click to clear. Sources: YouTube Data API v3; Wikipedia/Wikidata and news sources for home cities; ABS-derived state boundaries.",
+  "description": "Proportional symbol map of where Australia's top 40 YouTube creators are based (one circle per documented home city, area = combined subscribers of the creators based there), linked to a bar chart of the 15 largest channels by subscribers. Click a city or a bar to highlight that city in both views; double-click to clear. Sources: YouTube Data API v3; Wikipedia/Wikidata and news sources for home cities; ABS-derived state boundaries.",
   "data": {
     "url": "data/creators.csv",
     "format": {
@@ -15,24 +15,6 @@
     }
   },
   "params": [
-    {
-      "name": "metric",
-      "value": "subscribers",
-      "bind": {
-        "input": "radio",
-        "options": [
-          "subscribers",
-          "views",
-          "videos"
-        ],
-        "labels": [
-          "Subscribers",
-          "Total views",
-          "Videos uploaded"
-        ],
-        "name": "Measure: "
-      }
-    },
     {
       "name": "pick",
       "select": {
@@ -51,14 +33,14 @@
   ],
   "transform": [
     {
-      "calculate": "datum[metric]",
+      "calculate": "datum.subscribers",
       "as": "m"
     }
   ],
-  "spacing": 40,
+  "spacing": 24,
   "hconcat": [
     {
-      "width": 500,
+      "width": 460,
       "height": 430,
       "projection": {
         "type": "conicEqualArea",
@@ -152,7 +134,7 @@
             "size": {
               "field": "total_m",
               "type": "quantitative",
-              "title": "City total, for the measure chosen above",
+              "title": "Combined subscribers in each city",
               "scale": {
                 "range": [
                   60,
@@ -168,9 +150,11 @@
                 "symbolStrokeWidth": 0,
                 "labelExpr": "replace(datum.label, 'G', 'B')",
                 "titleLimit": 260,
-                "values": {
-                  "expr": "metric === 'views' ? [1e9, 5e9, 15e9] : metric === 'videos' ? [500, 2000, 4000] : [2e6, 10e6, 20e6]"
-                }
+                "values": [
+                  2000000,
+                  10000000,
+                  20000000
+                ]
               }
             },
             "color": {
@@ -213,12 +197,99 @@
               }
             ]
           }
+        },
+        {
+          "description": "City names beside the circles, placed just past each circle's edge (radius worked out from the circle's area).",
+          "transform": [
+            {
+              "filter": "isValid(datum.lat) && isValid(datum.lon)"
+            },
+            {
+              "aggregate": [
+                {
+                  "op": "sum",
+                  "field": "m",
+                  "as": "total_m"
+                },
+                {
+                  "op": "sum",
+                  "field": "subscribers",
+                  "as": "total_subs"
+                },
+                {
+                  "op": "sum",
+                  "field": "views",
+                  "as": "total_views"
+                },
+                {
+                  "op": "count",
+                  "as": "n"
+                },
+                {
+                  "op": "values",
+                  "as": "vals"
+                }
+              ],
+              "groupby": [
+                "city",
+                "lat",
+                "lon"
+              ]
+            },
+            {
+              "calculate": "join(pluck(datum.vals, 'channel'), ', ')",
+              "as": "names"
+            },
+            {
+              "joinaggregate": [
+                {
+                  "op": "max",
+                  "field": "total_m",
+                  "as": "max_m"
+                }
+              ]
+            },
+            {
+              "calculate": "sqrt((60 + (2200 - 60) * datum.total_m / datum.max_m) / PI)",
+              "as": "radius"
+            },
+            {
+              "calculate": "replace(datum.city, ' (shown at Cairns)', '')",
+              "as": "city_label"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "fontSize": 12,
+            "color": "#0b0b0b",
+            "dx": {
+              "expr": "datum.radius + 4"
+            },
+            "dy": {
+              "expr": "datum.city === 'Central Coast' ? -10 : datum.city === 'Sydney' ? 10 : 0"
+            }
+          },
+          "encoding": {
+            "longitude": {
+              "field": "lon",
+              "type": "quantitative"
+            },
+            "latitude": {
+              "field": "lat",
+              "type": "quantitative"
+            },
+            "text": {
+              "field": "city_label"
+            }
+          }
         }
       ]
     },
     {
       "name": "creator_bars",
-      "width": 300,
+      "width": 280,
       "height": 430,
       "transform": [
         {
@@ -259,9 +330,7 @@
           "field": "m",
           "type": "quantitative",
           "axis": {
-            "title": {
-              "expr": "metric === 'views' ? 'Total views' : metric === 'videos' ? 'Videos uploaded' : 'YouTube subscribers'"
-            },
+            "title": "YouTube subscribers",
             "format": "~s",
             "labelExpr": "datum.value === 0 ? '0' : replace(datum.label, 'G', 'B')",
             "tickCount": 4
@@ -310,6 +379,18 @@
             "format": ","
           }
         ]
+      },
+      "title": {
+        "text": [
+          "Blue: shown on the map  ·  grey: home city not documented",
+          "Orange: the city you picked"
+        ],
+        "anchor": "start",
+        "fontSize": 12,
+        "fontWeight": "normal",
+        "color": "#52514e",
+        "offset": 10,
+        "lineHeight": 16
       }
     }
   ]

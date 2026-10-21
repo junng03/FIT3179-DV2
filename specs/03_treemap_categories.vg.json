@@ -1,6 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "Zoomable treemap of Australia's top 40 YouTube creators. Each rectangle is one channel, grouped by its main category (the YouTube category used most often across its 50 most recent uploads) and sized by subscribers or total views. Gaming, the largest category, is orange. Click a category to zoom in; click again to zoom out. Source: YouTube Data API v3.",
+  "description": "Zoomable treemap of Australia's top 40 YouTube creators. Each rectangle is one channel, grouped by its main category (the YouTube category used most often across its 50 most recent uploads) and sized by subscribers or total views. Each category has a dark border. Gaming, the largest category, is orange. Click a category to zoom in: the view first zooms like a camera so that category fills the chart (the others slide off the edges), then cross-fades to a tidy full-size layout of its channels; click again to zoom back out. Source: YouTube Data API v3.",
   "height": 460,
   "padding": 4,
   "autosize": "none",
@@ -20,26 +20,136 @@
       "value": "subscribers",
       "bind": {
         "input": "radio",
-        "options": ["subscribers", "views"],
-        "labels": ["Subscribers", "Total views"],
+        "options": [
+          "subscribers",
+          "views"
+        ],
+        "labels": [
+          "Subscribers",
+          "Total views"
+        ],
         "name": "Size by: "
       }
     },
     {
-      "name": "zoom",
-      "description": "The category being zoomed into, or '' for all categories.",
-      "value": "",
+      "name": "header_h",
+      "description": "Space at the top for the instruction / back line.",
+      "value": 26
+    },
+    {
+      "name": "tm_h",
+      "description": "Height of the treemap area below the header.",
+      "update": "height - header_h"
+    },
+    {
+      "name": "zoomed",
+      "description": "true while zoomed into one category. Any click on the treemap toggles it; the header link always zooms out.",
+      "value": false,
       "on": [
         {
-          "events": "@cells:click, @groupbox:click, @grouplabel:click",
-          "update": "zoom !== '' ? '' : (datum.category ? datum.category : datum.key)"
+          "events": "@cells:click, @groupbox:click, @grouplabel:click, @zcells:click, @zgroupbox:click",
+          "update": "!zoomed"
         },
-        {"events": "@header:click", "update": "''"}
+        {
+          "events": "@header:click",
+          "update": "false"
+        }
       ]
     },
     {
-      "name": "header_h",
-      "value": 26
+      "name": "zoom_cat",
+      "description": "The category to zoom into. Set by a click only while the overview is showing (e < 0.5), and kept while zooming back out so the animation can run in reverse. It tests e rather than 'zoomed' because the same click changes 'zoomed' first.",
+      "value": "",
+      "on": [
+        {
+          "events": "@cells:click",
+          "update": "e < 0.5 ? datum.category : zoom_cat"
+        },
+        {
+          "events": "@groupbox:click, @grouplabel:click",
+          "update": "e < 0.5 ? datum.key : zoom_cat"
+        }
+      ]
+    },
+    {
+      "name": "t0",
+      "description": "When the last zoom started.",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "signal": "zoomed"
+          },
+          "update": "now()"
+        }
+      ]
+    },
+    {
+      "name": "z_from",
+      "description": "Where the last zoom started from (so a zoom can reverse midway).",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "signal": "zoomed"
+          },
+          "update": "zp"
+        }
+      ]
+    },
+    {
+      "name": "zp",
+      "description": "Zoom progress, 0 = overview, 1 = zoomed in. Driven by elapsed time (700 ms), not by frames, so it takes the same time on any computer.",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "timer",
+            "throttle": 16
+          },
+          "update": "z_from + ((zoomed ? 1 : 0) - z_from) * clamp((now() - t0) / 700, 0, 1)"
+        }
+      ]
+    },
+    {
+      "name": "e",
+      "description": "Eased progress (smoothstep), so the zoom starts and ends gently.",
+      "update": "zp * zp * (3 - 2 * zp)"
+    },
+    {
+      "name": "fade_in",
+      "description": "Cross-fade to the tidy zoomed layout over the last 45% of the zoom.",
+      "update": "clamp((e - 0.55) / 0.45, 0, 1)"
+    },
+    {
+      "name": "zg",
+      "description": "The zoomed category's box in the overview (or the whole area if none).",
+      "update": "length(data('zoom_group')) ? data('zoom_group')[0] : {x0: 0, y0: 0, x1: width, y1: tm_h}"
+    },
+    {
+      "name": "wx0",
+      "description": "The camera window: the part of the overview that fills the chart. It moves from the whole overview to the zoomed category's box.",
+      "update": "zg.x0 * e"
+    },
+    {
+      "name": "wy0",
+      "update": "zg.y0 * e"
+    },
+    {
+      "name": "wx1",
+      "update": "width + (zg.x1 - width) * e"
+    },
+    {
+      "name": "wy1",
+      "update": "tm_h + (zg.y1 - tm_h) * e"
+    },
+    {
+      "name": "sx",
+      "update": "width / max(1, wx1 - wx0)"
+    },
+    {
+      "name": "sy",
+      "update": "tm_h / max(1, wy1 - wy0)"
     }
   ],
   "data": [
@@ -55,50 +165,352 @@
           "made_for_kids_share": "number",
           "shorts_share": "number"
         }
-      }
-    },
-    {
-      "name": "shown",
-      "source": "creators",
+      },
       "transform": [
-        {"type": "formula", "expr": "datum[size_by]", "as": "size"},
-        {"type": "filter", "expr": "zoom === '' || datum.category === zoom"}
+        {
+          "type": "formula",
+          "expr": "datum[size_by]",
+          "as": "size"
+        },
+        {
+          "type": "formula",
+          "expr": "replace(format(datum.size, '.3~s'), 'G', 'B')",
+          "as": "size_label"
+        }
       ]
     },
     {
-      "name": "tree",
-      "source": "shown",
+      "name": "size_total",
+      "source": "creators",
       "transform": [
-        {"type": "nest", "keys": ["category"], "generate": true},
+        {
+          "type": "aggregate",
+          "ops": [
+            "sum"
+          ],
+          "fields": [
+            "size"
+          ],
+          "as": [
+            "total"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "1",
+          "as": "k"
+        }
+      ],
+      "description": "Total of the current size measure (subscribers or views), for each category's share."
+    },
+    {
+      "name": "cat_totals",
+      "description": "Each category's total of the current size measure. (Vega's treemap layout doesn't keep it, so it is added up here.)",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "category"
+          ],
+          "ops": [
+            "sum"
+          ],
+          "fields": [
+            "size"
+          ],
+          "as": [
+            "cat_total"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tree_all",
+      "description": "Overview layout: every channel, grouped by category (coordinates inside the treemap area).",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "nest",
+          "keys": [
+            "category"
+          ],
+          "generate": true
+        },
         {
           "type": "treemap",
           "field": "size",
-          "sort": {"field": "value", "order": "descending"},
+          "sort": {
+            "field": "value",
+            "order": "descending"
+          },
           "round": true,
           "method": "squarify",
           "ratio": 1.4,
-          "paddingInner": 2,
+          "paddingInner": 3,
+          "paddingOuter": 3,
           "paddingTop": 20,
-          "size": [{"signal": "width"}, {"signal": "height - header_h + 20"}]
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "tm_h + 20"
+            }
+          ]
         },
-        {"type": "formula", "expr": "datum.y0 + header_h - 20", "as": "y0"},
-        {"type": "formula", "expr": "datum.y1 + header_h - 20", "as": "y1"}
+        {
+          "type": "formula",
+          "expr": "datum.y0 - 20",
+          "as": "y0"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.y1 - 20",
+          "as": "y1"
+        }
+      ]
+    },
+    {
+      "name": "groups_base",
+      "source": "tree_all",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.children && datum.depth === 1"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.children",
+          "as": "n"
+        },
+        {
+          "type": "formula",
+          "expr": "1",
+          "as": "k"
+        },
+        {
+          "type": "lookup",
+          "from": "size_total",
+          "key": "k",
+          "fields": [
+            "k"
+          ],
+          "as": [
+            "t"
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "cat_totals",
+          "key": "category",
+          "fields": [
+            "key"
+          ],
+          "as": [
+            "c"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.c.cat_total",
+          "as": "cat_total"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.cat_total / datum.t.total",
+          "as": "share"
+        }
+      ]
+    },
+    {
+      "name": "zoom_group",
+      "source": "groups_base",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.key === zoom_cat"
+        }
       ]
     },
     {
       "name": "groups",
-      "source": "tree",
+      "description": "Overview category boxes, seen through the camera window (scaled up as the camera zooms).",
+      "source": "groups_base",
       "transform": [
-        {"type": "filter", "expr": "datum.children && datum.depth === 1"},
-        {"type": "formula", "expr": "datum.children", "as": "n"}
+        {
+          "type": "formula",
+          "expr": "(datum.x0 - wx0) * sx",
+          "as": "cx0"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.y0 - wy0) * sy",
+          "as": "cy0"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.x1 - wx0) * sx",
+          "as": "cx1"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.y1 - wy0) * sy",
+          "as": "cy1"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.key === zoom_cat ? 1 - fade_in : 1 - e",
+          "as": "fade"
+        }
       ]
     },
     {
       "name": "leaves",
-      "source": "tree",
+      "description": "Overview channel rectangles, seen through the camera window.",
+      "source": "tree_all",
       "transform": [
-        {"type": "filter", "expr": "!datum.children"},
-        {"type": "formula", "expr": "replace(format(datum.size, '.3~s'), 'G', 'B')", "as": "size_label"}
+        {
+          "type": "filter",
+          "expr": "!datum.children"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.x0 - wx0) * sx",
+          "as": "cx0"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.y0 - wy0) * sy",
+          "as": "cy0"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.x1 - wx0) * sx",
+          "as": "cx1"
+        },
+        {
+          "type": "formula",
+          "expr": "(datum.y1 - wy0) * sy",
+          "as": "cy1"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.category === zoom_cat ? 1 - fade_in : 1 - e",
+          "as": "fade"
+        }
+      ]
+    },
+    {
+      "name": "tree_zoom",
+      "description": "Tidy zoomed layout: only the chosen category's channels, laid out again to fill the whole area. Empty until a category has been clicked.",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.category === zoom_cat"
+        },
+        {
+          "type": "nest",
+          "keys": [
+            "category"
+          ],
+          "generate": true
+        },
+        {
+          "type": "treemap",
+          "field": "size",
+          "sort": {
+            "field": "value",
+            "order": "descending"
+          },
+          "round": true,
+          "method": "squarify",
+          "ratio": 1.4,
+          "paddingInner": 3,
+          "paddingOuter": 3,
+          "paddingTop": 20,
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "tm_h + 20"
+            }
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.y0 - 20",
+          "as": "y0"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.y1 - 20",
+          "as": "y1"
+        }
+      ]
+    },
+    {
+      "name": "zgroups",
+      "source": "tree_zoom",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "fade_in > 0 && datum.children && datum.depth === 1"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.children",
+          "as": "n"
+        },
+        {
+          "type": "formula",
+          "expr": "1",
+          "as": "k"
+        },
+        {
+          "type": "lookup",
+          "from": "size_total",
+          "key": "k",
+          "fields": [
+            "k"
+          ],
+          "as": [
+            "t"
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "cat_totals",
+          "key": "category",
+          "fields": [
+            "key"
+          ],
+          "as": [
+            "c"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.c.cat_total",
+          "as": "cat_total"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.cat_total / datum.t.total",
+          "as": "share"
+        }
+      ]
+    },
+    {
+      "name": "zleaves",
+      "source": "tree_zoom",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "fade_in > 0 && !datum.children"
+        }
       ]
     }
   ],
@@ -108,116 +520,515 @@
       "name": "header",
       "encode": {
         "enter": {
-          "x": {"value": 0},
-          "y": {"value": 14},
-          "fontSize": {"value": 12},
-          "baseline": {"value": "middle"}
+          "x": {
+            "value": 0
+          },
+          "y": {
+            "value": 14
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "baseline": {
+            "value": "middle"
+          }
         },
         "update": {
           "text": {
-            "signal": "zoom !== '' ? '← Back to all categories   ·   showing ' + zoom + ' only' : 'Click any category to zoom in'"
+            "signal": "zoomed ? '← Back to all categories   ·   showing ' + zoom_cat + ' only' : 'Click any category to zoom in'"
           },
-          "fill": {"signal": "zoom !== '' ? '#a8431b' : '#52514e'"},
-          "fontWeight": {"signal": "zoom !== '' ? 'bold' : 'normal'"},
-          "cursor": {"signal": "zoom !== '' ? 'pointer' : 'default'"}
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "groupbox",
-      "from": {"data": "groups"},
-      "encode": {
-        "update": {
-          "x": {"field": "x0"},
-          "y": {"field": "y0"},
-          "x2": {"field": "x1"},
-          "y2": {"field": "y1"},
-          "fill": {"value": "#f0efec"},
-          "cursor": {"value": "pointer"},
-          "tooltip": {
-            "signal": "{'Category': datum.key, 'Channels': datum.n, 'Combined': format(datum.value, ',') + (size_by === 'views' ? ' views' : ' subscribers'), 'Click': zoom !== '' ? 'to zoom out' : 'to zoom in'}"
+          "fill": {
+            "signal": "zoomed ? '#a8431b' : '#52514e'"
+          },
+          "fontWeight": {
+            "signal": "zoomed ? 'bold' : 'normal'"
+          },
+          "cursor": {
+            "signal": "zoomed ? 'pointer' : 'default'"
           }
         }
       }
     },
     {
-      "type": "text",
-      "name": "grouplabel",
-      "from": {"data": "groups"},
+      "type": "group",
+      "description": "The treemap area below the header. clip: true keeps zooming rectangles inside it.",
       "encode": {
         "update": {
-          "x": {"signal": "datum.x0 + 4"},
-          "y": {"signal": "datum.y0 + 14"},
-          "text": {
-            "signal": "(datum.x1 - datum.x0) > 70 ? datum.key + ((datum.x1 - datum.x0) > 150 ? ' · ' + datum.n + (datum.n === 1 ? ' channel' : ' channels') : '') : ''"
+          "x": {
+            "value": 0
           },
-          "limit": {"signal": "datum.x1 - datum.x0 - 8"},
-          "fontSize": {"value": 12},
-          "fontWeight": {"value": "bold"},
-          "fill": {"value": "#0b0b0b"},
-          "cursor": {"value": "pointer"}
+          "y": {
+            "signal": "header_h"
+          },
+          "width": {
+            "signal": "width"
+          },
+          "height": {
+            "signal": "tm_h"
+          },
+          "clip": {
+            "value": true
+          }
         }
-      }
-    },
-    {
-      "type": "rect",
-      "name": "cells",
-      "from": {"data": "leaves"},
-      "encode": {
-        "update": {
-          "x": {"field": "x0"},
-          "y": {"field": "y0"},
-          "x2": {"field": "x1"},
-          "y2": {"field": "y1"},
-          "fill": {"signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"},
-          "stroke": {"value": "#fcfcfb"},
-          "strokeWidth": {"value": 1},
-          "cursor": {"value": "pointer"},
-          "tooltip": {
-            "signal": "{'Channel': datum.channel, 'Main category': datum.category, 'Subscribers': format(datum.subscribers, ','), 'Total views': format(datum.views, ','), 'Videos uploaded': format(datum.videos, ','), 'Recent uploads that are Shorts (3 min or less)': format(datum.shorts_share, '.0%'), 'Click': zoom !== '' ? 'to zoom out' : 'to zoom in to ' + datum.category}"
+      },
+      "marks": [
+        {
+          "type": "rect",
+          "name": "groupbox",
+          "description": "Overview: light grey box behind each category (its label strip shows at the top).",
+          "from": {
+            "data": "groups"
+          },
+          "encode": {
+            "update": {
+              "x": {
+                "field": "cx0"
+              },
+              "y": {
+                "field": "cy0"
+              },
+              "x2": {
+                "field": "cx1"
+              },
+              "y2": {
+                "field": "cy1"
+              },
+              "fill": {
+                "value": "#f0efec"
+              },
+              "opacity": {
+                "field": "fade"
+              },
+              "cursor": {
+                "value": "pointer"
+              },
+              "tooltip": {
+                "signal": "zoomed ? null : {'Category': datum.key, 'Channels': datum.n, 'Combined': format(datum.cat_total, ',') + (size_by === 'views' ? ' views' : ' subscribers'), 'Click': 'to zoom in'}"
+              }
+            }
           }
         },
-        "hover": {
-          "stroke": {"value": "#0b0b0b"},
-          "strokeWidth": {"value": 2}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "leaves"},
-      "interactive": false,
-      "encode": {
-        "update": {
-          "x": {"signal": "datum.x0 + 5"},
-          "y": {"signal": "datum.y0 + 15"},
-          "text": {
-            "signal": "(datum.x1 - datum.x0) > 60 && (datum.y1 - datum.y0) > 22 ? datum.channel : ''"
+        {
+          "type": "text",
+          "name": "grouplabel",
+          "from": {
+            "data": "groups"
           },
-          "limit": {"signal": "datum.x1 - datum.x0 - 10"},
-          "fontSize": {"value": 12},
-          "fontWeight": {"value": "bold"},
-          "fill": {"value": "#ffffff"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "from": {"data": "leaves"},
-      "interactive": false,
-      "encode": {
-        "update": {
-          "x": {"signal": "datum.x0 + 5"},
-          "y": {"signal": "datum.y0 + 30"},
-          "text": {
-            "signal": "(datum.x1 - datum.x0) > 60 && (datum.y1 - datum.y0) > 40 ? datum.size_label + (size_by === 'views' ? ' views' : ' subs') : ''"
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.cx0 + 6"
+              },
+              "y": {
+                "signal": "datum.cy0 + 14"
+              },
+              "text": {
+                "signal": "(datum.cx1 - datum.cx0) > 70 ? datum.key + ((datum.cx1 - datum.cx0) > 150 ? ' · ' + datum.n + (datum.n === 1 ? ' channel' : ' channels') : '') + ((datum.cx1 - datum.cx0) > 290 ? ' · ' + format(datum.share, '.0%') + (size_by === 'views' ? ' of views' : ' of subscribers') : '') : ''"
+              },
+              "limit": {
+                "signal": "datum.cx1 - datum.cx0 - 10"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fontWeight": {
+                "value": "bold"
+              },
+              "fill": {
+                "value": "#0b0b0b"
+              },
+              "opacity": {
+                "field": "fade"
+              },
+              "cursor": {
+                "value": "pointer"
+              }
+            }
+          }
+        },
+        {
+          "type": "rect",
+          "name": "cells",
+          "description": "Overview: one rectangle per channel.",
+          "from": {
+            "data": "leaves"
           },
-          "limit": {"signal": "datum.x1 - datum.x0 - 10"},
-          "fontSize": {"value": 12},
-          "fill": {"value": "#ffffff"}
+          "encode": {
+            "update": {
+              "x": {
+                "field": "cx0"
+              },
+              "y": {
+                "field": "cy0"
+              },
+              "x2": {
+                "field": "cx1"
+              },
+              "y2": {
+                "field": "cy1"
+              },
+              "fill": {
+                "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+              },
+              "opacity": {
+                "field": "fade"
+              },
+              "stroke": {
+                "value": "#fcfcfb"
+              },
+              "strokeWidth": {
+                "value": 1
+              },
+              "cursor": {
+                "value": "pointer"
+              },
+              "tooltip": {
+                "signal": "zoomed ? null : {'Channel': datum.channel, 'Main category': datum.category, 'Subscribers': format(datum.subscribers, ','), 'Total views': format(datum.views, ','), 'Videos uploaded': format(datum.videos, ','), 'Recent uploads that are Shorts (3 min or less)': format(datum.shorts_share, '.0%'), 'Click': 'to zoom in to ' + datum.category}"
+              }
+            },
+            "hover": {
+              "stroke": {
+                "value": "#0b0b0b"
+              },
+              "strokeWidth": {
+                "value": 2
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "description": "Overview: channel name, when its rectangle is big enough.",
+          "from": {
+            "data": "leaves"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.cx0 + 5"
+              },
+              "y": {
+                "signal": "datum.cy0 + 15"
+              },
+              "text": {
+                "signal": "(datum.cx1 - datum.cx0) > 60 && (datum.cy1 - datum.cy0) > 22 ? datum.channel : ''"
+              },
+              "limit": {
+                "signal": "datum.cx1 - datum.cx0 - 10"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fontWeight": {
+                "value": "bold"
+              },
+              "fill": {
+                "value": "#ffffff"
+              },
+              "opacity": {
+                "field": "fade"
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "description": "Overview: subscribers or views under the name, when the rectangle is big enough.",
+          "from": {
+            "data": "leaves"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.cx0 + 5"
+              },
+              "y": {
+                "signal": "datum.cy0 + 30"
+              },
+              "text": {
+                "signal": "(datum.cx1 - datum.cx0) > 60 && (datum.cy1 - datum.cy0) > 40 ? datum.size_label + (size_by === 'views' ? ' views' : ' subs') : ''"
+              },
+              "limit": {
+                "signal": "datum.cx1 - datum.cx0 - 10"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fill": {
+                "value": "#ffffff"
+              },
+              "opacity": {
+                "field": "fade"
+              }
+            }
+          }
+        },
+        {
+          "type": "rect",
+          "description": "Overview: dark border around each category, drawn over its channels, so the categories read as separate blocks.",
+          "from": {
+            "data": "groups"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "field": "cx0"
+              },
+              "y": {
+                "field": "cy0"
+              },
+              "x2": {
+                "field": "cx1"
+              },
+              "y2": {
+                "field": "cy1"
+              },
+              "fillOpacity": {
+                "value": 0
+              },
+              "stroke": {
+                "value": "#52514e"
+              },
+              "strokeWidth": {
+                "value": 1.5
+              },
+              "strokeOpacity": {
+                "field": "fade"
+              },
+              "cornerRadius": {
+                "value": 2
+              }
+            }
+          }
+        },
+        {
+          "type": "rect",
+          "name": "zgroupbox",
+          "description": "Zoomed layout: the category's box, fading in at the end of the zoom.",
+          "from": {
+            "data": "zgroups"
+          },
+          "encode": {
+            "update": {
+              "x": {
+                "field": "x0"
+              },
+              "y": {
+                "field": "y0"
+              },
+              "x2": {
+                "field": "x1"
+              },
+              "y2": {
+                "field": "y1"
+              },
+              "fill": {
+                "value": "#f0efec"
+              },
+              "opacity": {
+                "signal": "fade_in"
+              },
+              "cursor": {
+                "value": "pointer"
+              },
+              "tooltip": {
+                "signal": "{'Category': datum.key, 'Channels': datum.n, 'Combined': format(datum.cat_total, ',') + (size_by === 'views' ? ' views' : ' subscribers'), 'Click': 'to zoom out'}"
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {
+            "data": "zgroups"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.x0 + 6"
+              },
+              "y": {
+                "signal": "datum.y0 + 14"
+              },
+              "text": {
+                "signal": "datum.key + ' · ' + datum.n + (datum.n === 1 ? ' channel' : ' channels') + ' · ' + format(datum.share, '.0%') + (size_by === 'views' ? ' of views' : ' of subscribers') + ' of the top 40'"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fontWeight": {
+                "value": "bold"
+              },
+              "fill": {
+                "value": "#0b0b0b"
+              },
+              "opacity": {
+                "signal": "fade_in"
+              }
+            }
+          }
+        },
+        {
+          "type": "rect",
+          "name": "zcells",
+          "description": "Zoomed layout: one rectangle per channel in the chosen category.",
+          "from": {
+            "data": "zleaves"
+          },
+          "encode": {
+            "update": {
+              "x": {
+                "field": "x0"
+              },
+              "y": {
+                "field": "y0"
+              },
+              "x2": {
+                "field": "x1"
+              },
+              "y2": {
+                "field": "y1"
+              },
+              "fill": {
+                "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+              },
+              "opacity": {
+                "signal": "fade_in"
+              },
+              "stroke": {
+                "value": "#fcfcfb"
+              },
+              "strokeWidth": {
+                "value": 1
+              },
+              "cursor": {
+                "value": "pointer"
+              },
+              "tooltip": {
+                "signal": "{'Channel': datum.channel, 'Main category': datum.category, 'Subscribers': format(datum.subscribers, ','), 'Total views': format(datum.views, ','), 'Videos uploaded': format(datum.videos, ','), 'Recent uploads that are Shorts (3 min or less)': format(datum.shorts_share, '.0%'), 'Click': 'to zoom out'}"
+              }
+            },
+            "hover": {
+              "stroke": {
+                "value": "#0b0b0b"
+              },
+              "strokeWidth": {
+                "value": 2
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {
+            "data": "zleaves"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.x0 + 5"
+              },
+              "y": {
+                "signal": "datum.y0 + 15"
+              },
+              "text": {
+                "signal": "(datum.x1 - datum.x0) > 60 && (datum.y1 - datum.y0) > 22 ? datum.channel : ''"
+              },
+              "limit": {
+                "signal": "datum.x1 - datum.x0 - 10"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fontWeight": {
+                "value": "bold"
+              },
+              "fill": {
+                "value": "#ffffff"
+              },
+              "opacity": {
+                "signal": "fade_in"
+              }
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {
+            "data": "zleaves"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "signal": "datum.x0 + 5"
+              },
+              "y": {
+                "signal": "datum.y0 + 30"
+              },
+              "text": {
+                "signal": "(datum.x1 - datum.x0) > 60 && (datum.y1 - datum.y0) > 40 ? datum.size_label + (size_by === 'views' ? ' views' : ' subs') : ''"
+              },
+              "limit": {
+                "signal": "datum.x1 - datum.x0 - 10"
+              },
+              "fontSize": {
+                "value": 12
+              },
+              "fill": {
+                "value": "#ffffff"
+              },
+              "opacity": {
+                "signal": "fade_in"
+              }
+            }
+          }
+        },
+        {
+          "type": "rect",
+          "description": "Zoomed layout: the category's dark border.",
+          "from": {
+            "data": "zgroups"
+          },
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {
+                "field": "x0"
+              },
+              "y": {
+                "field": "y0"
+              },
+              "x2": {
+                "field": "x1"
+              },
+              "y2": {
+                "field": "y1"
+              },
+              "fillOpacity": {
+                "value": 0
+              },
+              "stroke": {
+                "value": "#52514e"
+              },
+              "strokeWidth": {
+                "value": 1.5
+              },
+              "strokeOpacity": {
+                "signal": "fade_in"
+              },
+              "cornerRadius": {
+                "value": 2
+              }
+            }
+          }
         }
-      }
+      ]
     }
   ]
 }

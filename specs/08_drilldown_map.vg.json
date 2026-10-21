@@ -1,0 +1,1270 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Three-level drill-down. (1) World: where people search YouTube for Australian creators (Google Trends, 0-100, 100 = the place where that creator's share of searches was highest). (2) Click Australia: the Equal Earth projection animates to an Australia-centred view and the states are coloured the same way. (3) Click a state: a treemap of the top-40 creators whose documented home is in that state, sized by subscribers (Gaming orange, as in chart 3). The menu picks which of four creators' Google Trends scores colour the maps. '<- Back' or a double-click goes up one level. Only 12 of the 40 creators have a documented home city, so each state's treemap shows only those. Sources: Google Trends (YouTube Search, scripts/fetch_trends.py); YouTube Data API v3; home cities from data/creator_cities.csv, mapped to states in data/city_states.csv; Natural Earth via vega-datasets; ABS-derived state boundaries.",
+  "height": 520,
+  "padding": 4,
+  "autosize": "none",
+  "signals": [
+    {
+      "name": "width",
+      "init": "isFinite(containerSize()[0]) && containerSize()[0] > 0 ? containerSize()[0] - 8 : 960",
+      "on": [
+        {
+          "events": "window:resize",
+          "update": "isFinite(containerSize()[0]) && containerSize()[0] > 0 ? containerSize()[0] - 8 : 960"
+        }
+      ]
+    },
+    {
+      "name": "creator",
+      "description": "Which creator's Google Trends scores colour the maps. Names must match the creator column of the trends files.",
+      "value": "How Ridiculous",
+      "bind": {
+        "input": "select",
+        "options": [
+          "How Ridiculous",
+          "LazarBeam",
+          "Lachlan",
+          "Bridey Drake"
+        ],
+        "name": "Creator: "
+      }
+    },
+    {
+      "name": "level",
+      "description": "'world', 'australia' or 'state'. Clicks go down a level; the back link or a double-click goes up one.",
+      "value": "world",
+      "on": [
+        {
+          "events": "@countries:click",
+          "update": "level === 'world' && datum.id === 36 ? 'australia' : level"
+        },
+        {
+          "events": "@states:click, @act_box:click",
+          "update": "level === 'australia' ? 'state' : level"
+        },
+        {
+          "events": "@header:click, dblclick",
+          "update": "level === 'state' ? 'australia' : 'world'"
+        }
+      ]
+    },
+    {
+      "name": "picked_state",
+      "description": "The state clicked in the Australia view. It doesn't test the level: the same click also changes 'level', which updates first. In the state view the panel covers the map, so state shapes can't be clicked there.",
+      "value": "",
+      "on": [
+        {
+          "events": "@states:click, @act_box:click",
+          "update": "datum.properties.STATE_NAME"
+        }
+      ]
+    },
+    {
+      "name": "t0",
+      "description": "When the last level change happened.",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "signal": "level"
+          },
+          "update": "now()"
+        }
+      ]
+    },
+    {
+      "name": "z_from",
+      "description": "Where the last zoom started from (so a zoom can reverse midway).",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "signal": "level"
+          },
+          "update": "z"
+        }
+      ]
+    },
+    {
+      "name": "z",
+      "description": "Zoom progress, 0 = world view, 1 = Australia view (the state level stays zoomed in). Driven by elapsed time, not frames, so it always takes about 0.65 s.",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "timer",
+            "throttle": 16
+          },
+          "update": "z_from + ((level !== 'world' ? 1 : 0) - z_from) * clamp((now() - t0) / 650, 0, 1)"
+        }
+      ]
+    },
+    {
+      "name": "s_prog",
+      "description": "Fade progress for the state treemap: 0 to 1 over 0.35 s after a state is clicked, 0 otherwise.",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "timer",
+            "throttle": 16
+          },
+          "update": "level === 'state' ? clamp((now() - t0) / 350, 0, 1) : 0"
+        }
+      ]
+    },
+    {
+      "name": "e",
+      "description": "Eased zoom progress (smoothstep), so the zoom starts and ends gently.",
+      "update": "z * z * (3 - 2 * z)"
+    },
+    {
+      "name": "e_detail",
+      "description": "Fade for the Australian layers: 0 until the zoom is 60% done, then up to 1; fades out again when a state's treemap opens.",
+      "update": "clamp((e - 0.6) / 0.4, 0, 1) * (1 - s_prog)"
+    },
+    {
+      "name": "scale_world",
+      "update": "min(width / 5.6, height / 2.45)"
+    },
+    {
+      "name": "scale_aus",
+      "update": "min(width * 0.95, height * 1.3)"
+    },
+    {
+      "name": "scale_now",
+      "description": "Zoom between the two scales on a log scale, so the zoom speed feels even.",
+      "update": "exp(log(scale_world) + (log(scale_aus) - log(scale_world)) * e)"
+    },
+    {
+      "name": "lon_now",
+      "description": "Turn the globe from Greenwich to Australia's centre (134 degrees E).",
+      "update": "-134 * e"
+    },
+    {
+      "name": "lat_now",
+      "update": "8 + (-26.5 - 8) * e"
+    },
+    {
+      "name": "header_h",
+      "description": "Space at the top for the instruction / back line.",
+      "value": 30
+    }
+  ],
+  "projections": [
+    {
+      "name": "proj",
+      "type": "equalEarth",
+      "scale": {
+        "signal": "scale_now"
+      },
+      "rotate": {
+        "signal": "[lon_now, 0, 0]"
+      },
+      "center": {
+        "signal": "[0, lat_now]"
+      },
+      "translate": {
+        "signal": "[width / 2, height / 2]"
+      }
+    }
+  ],
+  "data": [
+    {
+      "name": "world_trends",
+      "description": "One row per creator and country (countries Google reported as 0 are not in the file).",
+      "url": "data/trends_world.csv",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "iso_n3": "number",
+          "interest": "number"
+        }
+      },
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "isValid(datum.interest) && datum.interest > 0"
+        }
+      ]
+    },
+    {
+      "name": "world_scores",
+      "description": "One row per country: the chosen creator's score, plus every creator's score for the tooltip.",
+      "source": "world_trends",
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'How Ridiculous' ? datum.interest : null",
+          "as": "hr"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'LazarBeam' ? datum.interest : null",
+          "as": "lb"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'Lachlan' ? datum.interest : null",
+          "as": "la"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'Bridey Drake' ? datum.interest : null",
+          "as": "bd"
+        },
+        {
+          "type": "aggregate",
+          "groupby": [
+            "iso_n3",
+            "country"
+          ],
+          "ops": [
+            "sum",
+            "count",
+            "max",
+            "max",
+            "max",
+            "max"
+          ],
+          "fields": [
+            "interest",
+            null,
+            "hr",
+            "lb",
+            "la",
+            "bd"
+          ],
+          "as": [
+            "sum4",
+            "n_scored",
+            "hr",
+            "lb",
+            "la",
+            "bd"
+          ]
+        },
+        {
+          "type": "formula",
+          "as": "score",
+          "expr": "creator === 'How Ridiculous' ? datum.hr : creator === 'LazarBeam' ? datum.lb : creator === 'Lachlan' ? datum.la : datum.bd"
+        }
+      ]
+    },
+    {
+      "name": "world_shapes",
+      "url": "https://cdn.jsdelivr.net/npm/vega-datasets@2.8.0/data/world-110m.json",
+      "format": {
+        "type": "topojson",
+        "feature": "countries"
+      },
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.id !== 10"
+        },
+        {
+          "type": "lookup",
+          "from": "world_scores",
+          "key": "iso_n3",
+          "fields": [
+            "id"
+          ],
+          "as": [
+            "s"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "australia_outline",
+      "source": "world_shapes",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.id === 36"
+        }
+      ]
+    },
+    {
+      "name": "state_trends",
+      "url": "data/trends_state.csv",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "interest": "number"
+        }
+      }
+    },
+    {
+      "name": "state_scores",
+      "description": "One row per state: the chosen creator's score, plus every creator's score for the tooltip.",
+      "source": "state_trends",
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "isValid(datum.interest) ? datum.interest : 0",
+          "as": "interest0"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'How Ridiculous' ? datum.interest : null",
+          "as": "hr"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'LazarBeam' ? datum.interest : null",
+          "as": "lb"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'Lachlan' ? datum.interest : null",
+          "as": "la"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.creator === 'Bridey Drake' ? datum.interest : null",
+          "as": "bd"
+        },
+        {
+          "type": "aggregate",
+          "groupby": [
+            "state"
+          ],
+          "ops": [
+            "sum",
+            "valid",
+            "max",
+            "max",
+            "max",
+            "max"
+          ],
+          "fields": [
+            "interest0",
+            "interest",
+            "hr",
+            "lb",
+            "la",
+            "bd"
+          ],
+          "as": [
+            "sum4",
+            "n_scored",
+            "hr",
+            "lb",
+            "la",
+            "bd"
+          ]
+        },
+        {
+          "type": "formula",
+          "as": "score",
+          "expr": "creator === 'How Ridiculous' ? datum.hr : creator === 'LazarBeam' ? datum.lb : creator === 'Lachlan' ? datum.la : datum.bd"
+        }
+      ]
+    },
+    {
+      "name": "state_abbr",
+      "url": "data/state_tiles.csv",
+      "format": {
+        "type": "csv"
+      }
+    },
+    {
+      "name": "city_states",
+      "description": "Which state each documented home city is in.",
+      "url": "data/city_states.csv",
+      "format": {
+        "type": "csv"
+      }
+    },
+    {
+      "name": "creators",
+      "description": "The top 40 creators, each tagged with the state of their documented home city (blank if not documented).",
+      "url": "data/creators.csv",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "subscribers": "number"
+        }
+      },
+      "transform": [
+        {
+          "type": "lookup",
+          "from": "city_states",
+          "key": "city",
+          "fields": [
+            "city"
+          ],
+          "as": [
+            "cs"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "isValid(datum.cs) ? datum.cs.state : ''",
+          "as": "state"
+        }
+      ]
+    },
+    {
+      "name": "creators_by_state",
+      "description": "How many of the top 40 are based in each state, for the state tooltips.",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.state !== ''"
+        },
+        {
+          "type": "aggregate",
+          "groupby": [
+            "state"
+          ],
+          "ops": [
+            "count",
+            "sum"
+          ],
+          "fields": [
+            null,
+            "subscribers"
+          ],
+          "as": [
+            "n",
+            "subs"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "state_shapes",
+      "description": "State shapes, only in the Australia and state views (from 60% of the zoom-in), so they never sit on top of the world map catching clicks.",
+      "url": "https://cdn.jsdelivr.net/gh/rowanhogan/australian-states@master/states.geojson",
+      "format": {
+        "type": "json",
+        "property": "features"
+      },
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "level !== 'world' && z > 0.6"
+        },
+        {
+          "type": "lookup",
+          "from": "state_scores",
+          "key": "state",
+          "fields": [
+            "properties.STATE_NAME"
+          ],
+          "as": [
+            "s"
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "state_abbr",
+          "key": "state",
+          "fields": [
+            "properties.STATE_NAME"
+          ],
+          "as": [
+            "t"
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "creators_by_state",
+          "key": "state",
+          "fields": [
+            "properties.STATE_NAME"
+          ],
+          "as": [
+            "k"
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "geoCentroid('proj', datum)",
+          "as": "c"
+        }
+      ]
+    },
+    {
+      "name": "act_callout",
+      "description": "The ACT is too small to see or click at this scale, so a square off the coast shows its colour and opens its treemap.",
+      "source": "state_shapes",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.t.abbr === 'ACT'"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.c[0] + 95",
+          "as": "bx"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.c[1] + 55",
+          "as": "by"
+        }
+      ]
+    },
+    {
+      "name": "state_creators",
+      "description": "The creators based in the clicked state (only while the state view is open).",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "level === 'state' && datum.state === picked_state"
+        }
+      ]
+    },
+    {
+      "name": "state_tree",
+      "description": "Treemap layout of the clicked state's creators, sized by subscribers, below the header line.",
+      "source": "state_creators",
+      "transform": [
+        {
+          "type": "nest",
+          "keys": [
+            "state"
+          ],
+          "generate": true
+        },
+        {
+          "type": "treemap",
+          "field": "subscribers",
+          "sort": {
+            "field": "value",
+            "order": "descending"
+          },
+          "round": true,
+          "method": "squarify",
+          "ratio": 1.4,
+          "paddingInner": 3,
+          "paddingTop": 22,
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "height - header_h + 22"
+            }
+          ]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.y0 + header_h - 22",
+          "as": "y0"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.y1 + header_h - 22",
+          "as": "y1"
+        }
+      ]
+    },
+    {
+      "name": "state_group",
+      "source": "state_tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.children && datum.depth === 1"
+        }
+      ]
+    },
+    {
+      "name": "state_leaves",
+      "source": "state_tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "!datum.children"
+        }
+      ]
+    },
+    {
+      "name": "state_summary",
+      "description": "Count and combined subscribers for the header line.",
+      "source": "state_creators",
+      "transform": [
+        {
+          "type": "aggregate",
+          "ops": [
+            "count",
+            "sum"
+          ],
+          "fields": [
+            null,
+            "subscribers"
+          ],
+          "as": [
+            "n",
+            "subs"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "top40_total",
+      "source": "creators",
+      "transform": [
+        {
+          "type": "aggregate",
+          "ops": [
+            "sum"
+          ],
+          "fields": [
+            "subscribers"
+          ],
+          "as": [
+            "subs"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "state_view",
+      "description": "One row while the state view is open; draws the panel that covers the map.",
+      "values": [
+        {}
+      ],
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "level === 'state'"
+        }
+      ]
+    },
+    {
+      "name": "empty_state",
+      "description": "One row when the clicked state has no creator with a documented home, to show a message instead of a treemap.",
+      "values": [
+        {}
+      ],
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "level === 'state' && length(data('state_creators')) === 0"
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "color",
+      "type": "linear",
+      "domain": [
+        0,
+        100
+      ],
+      "range": [
+        "#cde2fb",
+        "#0d366b"
+      ],
+      "interpolate": "hcl"
+    }
+  ],
+  "legends": [
+    {
+      "fill": "color",
+      "type": "gradient",
+      "orient": "bottom-left",
+      "direction": "horizontal",
+      "gradientLength": 200,
+      "title": "Share of the place's YouTube searches (100 = highest place)",
+      "titleLimit": 320,
+      "encode": {
+        "title": {
+          "update": {
+            "opacity": {
+              "signal": "1 - s_prog"
+            }
+          }
+        },
+        "labels": {
+          "update": {
+            "opacity": {
+              "signal": "1 - s_prog"
+            },
+            "fillOpacity": {
+              "signal": "1 - s_prog"
+            }
+          }
+        },
+        "gradient": {
+          "update": {
+            "opacity": {
+              "signal": "1 - s_prog"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "marks": [
+    {
+      "type": "shape",
+      "name": "countries",
+      "description": "World choropleth. Coloured countries fade back as the map zooms into Australia, and the whole map fades out when a state's treemap opens.",
+      "from": {
+        "data": "world_shapes"
+      },
+      "encode": {
+        "update": {
+          "fill": {
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+          },
+          "fillOpacity": {
+            "signal": "isValid(datum.s) ? 1 - 0.7 * e : 1"
+          },
+          "opacity": {
+            "signal": "1 - s_prog"
+          },
+          "stroke": {
+            "value": "#fcfcfb"
+          },
+          "strokeWidth": {
+            "value": 0.5
+          },
+          "cursor": {
+            "signal": "datum.id === 36 && level === 'world' ? 'pointer' : 'default'"
+          },
+          "tooltip": {
+            "signal": "level !== 'world' ? null : isValid(datum.s) ? {'Country': datum.s.country, 'Creator': creator, 'Share of its searches (100 = highest)': format(datum.s.score, '.1~f'), 'Creators with enough searches': datum.s.n_scored + ' of 4', 'How Ridiculous': isValid(datum.s.hr) ? datum.s.hr : 'too few searches', 'LazarBeam': isValid(datum.s.lb) ? datum.s.lb : 'too few searches', 'Lachlan': isValid(datum.s.la) ? datum.s.la : 'too few searches', 'Bridey Drake': isValid(datum.s.bd) ? datum.s.bd : 'too few searches', 'Click': datum.id === 36 ? 'to zoom into Australia' : ''} : 'Too little search volume to score'"
+          }
+        }
+      },
+      "transform": [
+        {
+          "type": "geoshape",
+          "projection": "proj"
+        }
+      ]
+    },
+    {
+      "type": "shape",
+      "description": "Orange outline: Australia is the place to click. Fades out as the map zooms in.",
+      "from": {
+        "data": "australia_outline"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "fillOpacity": {
+            "value": 0
+          },
+          "stroke": {
+            "value": "#eb6834"
+          },
+          "strokeWidth": {
+            "value": 2.5
+          },
+          "strokeOpacity": {
+            "signal": "1 - e"
+          }
+        }
+      },
+      "transform": [
+        {
+          "type": "geoshape",
+          "projection": "proj"
+        }
+      ]
+    },
+    {
+      "type": "shape",
+      "name": "states",
+      "description": "State choropleth, fading in as the map zooms into Australia. Click a state to open its treemap. The hovered state is brought to the front (zindex) so its orange outline isn't covered by its neighbours' borders.",
+      "from": {
+        "data": "state_shapes"
+      },
+      "encode": {
+        "update": {
+          "fill": {
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+          },
+          "opacity": {
+            "signal": "e_detail"
+          },
+          "stroke": {
+            "value": "#fcfcfb"
+          },
+          "strokeWidth": {
+            "value": 1.2
+          },
+          "cursor": {
+            "signal": "level === 'australia' ? 'pointer' : 'default'"
+          },
+          "tooltip": {
+            "signal": "level !== 'australia' ? null : {'State': datum.properties.STATE_NAME, 'Creator': creator, 'Share of its searches (100 = highest)': isValid(datum.s.score) && datum.s.score > 0 ? format(datum.s.score, '.1~f') : 'too few searches', 'Creators with enough searches': datum.s.n_scored + ' of 4', 'How Ridiculous': isValid(datum.s.hr) ? datum.s.hr : 'too few searches', 'LazarBeam': isValid(datum.s.lb) ? datum.s.lb : 'too few searches', 'Lachlan': isValid(datum.s.la) ? datum.s.la : 'too few searches', 'Bridey Drake': isValid(datum.s.bd) ? datum.s.bd : 'too few searches', 'Top-40 creators based here': isValid(datum.k) ? datum.k.n : 'none documented', 'Click': 'to see the creators based here'}"
+          },
+          "zindex": {
+            "value": 0
+          }
+        },
+        "hover": {
+          "stroke": {
+            "value": "#eb6834"
+          },
+          "strokeWidth": {
+            "value": 3
+          },
+          "zindex": {
+            "value": 1
+          }
+        }
+      },
+      "transform": [
+        {
+          "type": "geoshape",
+          "projection": "proj"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "description": "State abbreviations at each state's centre (the ACT is labelled on its call-out square instead).",
+      "from": {
+        "data": "state_shapes"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.c[0] + (datum.t.abbr === 'VIC' ? -28 : 0)"
+          },
+          "y": {
+            "signal": "datum.c[1] + (datum.t.abbr === 'VIC' ? 4 : 0)"
+          },
+          "text": {
+            "signal": "datum.t.abbr === 'ACT' ? '' : datum.t.abbr"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "signal": "isValid(datum.s.score) && datum.s.score >= 55 ? '#ffffff' : '#0b0b0b'"
+          },
+          "opacity": {
+            "signal": "e_detail"
+          }
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "description": "Leader line from the ACT to its call-out square.",
+      "from": {
+        "data": "act_callout"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.c[0]"
+          },
+          "y": {
+            "signal": "datum.c[1]"
+          },
+          "x2": {
+            "field": "bx"
+          },
+          "y2": {
+            "field": "by"
+          },
+          "stroke": {
+            "value": "#52514e"
+          },
+          "strokeWidth": {
+            "value": 1
+          },
+          "opacity": {
+            "signal": "e_detail"
+          }
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "name": "act_box",
+      "description": "Call-out square coloured with the ACT's score; same tooltip, hover and click as the states.",
+      "from": {
+        "data": "act_callout"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": "bx"
+          },
+          "y": {
+            "field": "by"
+          },
+          "shape": {
+            "value": "square"
+          },
+          "size": {
+            "value": 420
+          },
+          "fill": {
+            "signal": "isValid(datum.s) && isValid(datum.s.score) && datum.s.score > 0 ? scale('color', datum.s.score) : '#e8e7e1'"
+          },
+          "stroke": {
+            "value": "#fcfcfb"
+          },
+          "strokeWidth": {
+            "value": 1.2
+          },
+          "opacity": {
+            "signal": "e_detail"
+          },
+          "cursor": {
+            "signal": "level === 'australia' ? 'pointer' : 'default'"
+          },
+          "tooltip": {
+            "signal": "level !== 'australia' ? null : {'State': datum.properties.STATE_NAME, 'Creator': creator, 'Share of its searches (100 = highest)': isValid(datum.s.score) && datum.s.score > 0 ? format(datum.s.score, '.1~f') : 'too few searches', 'Creators with enough searches': datum.s.n_scored + ' of 4', 'How Ridiculous': isValid(datum.s.hr) ? datum.s.hr : 'too few searches', 'LazarBeam': isValid(datum.s.lb) ? datum.s.lb : 'too few searches', 'Lachlan': isValid(datum.s.la) ? datum.s.la : 'too few searches', 'Bridey Drake': isValid(datum.s.bd) ? datum.s.bd : 'too few searches', 'Top-40 creators based here': isValid(datum.k) ? datum.k.n : 'none documented', 'Click': 'to see the creators based here'}"
+          }
+        },
+        "hover": {
+          "stroke": {
+            "value": "#eb6834"
+          },
+          "strokeWidth": {
+            "value": 3
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "act_callout"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.bx + 16"
+          },
+          "y": {
+            "field": "by"
+          },
+          "text": {
+            "value": "ACT"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "value": "#0b0b0b"
+          },
+          "opacity": {
+            "signal": "e_detail"
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "description": "State view: a panel over the map, fading in, so the treemap sits on a clean background. It also catches clicks, so the hidden map underneath can't be clicked.",
+      "from": {
+        "data": "state_view"
+      },
+      "interactive": true,
+      "encode": {
+        "update": {
+          "x": {
+            "value": 0
+          },
+          "y": {
+            "signal": "header_h"
+          },
+          "x2": {
+            "signal": "width"
+          },
+          "y2": {
+            "signal": "height"
+          },
+          "fill": {
+            "value": "#fcfcfb"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "description": "Message for a state with no documented creators.",
+      "from": {
+        "data": "empty_state"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "width / 2"
+          },
+          "y": {
+            "signal": "height / 2"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "text": {
+            "signal": "['None of the top 40 creators has a publicly documented home in ' + (picked_state === 'Australian Capital Territory' ? 'the ACT' : picked_state === 'Northern Territory' ? 'the Northern Territory' : picked_state) + '.', 'Only 12 of the 40 have a documented home city.']"
+          },
+          "lineHeight": {
+            "value": 20
+          },
+          "fontSize": {
+            "value": 14
+          },
+          "fill": {
+            "value": "#52514e"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "description": "The state's box behind its treemap.",
+      "from": {
+        "data": "state_group"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "field": "x0"
+          },
+          "y": {
+            "field": "y0"
+          },
+          "x2": {
+            "field": "x1"
+          },
+          "y2": {
+            "field": "y1"
+          },
+          "fill": {
+            "value": "#f0efec"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "state_group"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.x0 + 6"
+          },
+          "y": {
+            "signal": "datum.y0 + 15"
+          },
+          "text": {
+            "signal": "datum.key + ' · sized by subscribers'"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "value": "#0b0b0b"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "name": "state_cells",
+      "description": "One rectangle per creator based in the state; Gaming orange and other categories blue, as in chart 3. The creator picked in the menu gets a dark outline.",
+      "from": {
+        "data": "state_leaves"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": "x0"
+          },
+          "y": {
+            "field": "y0"
+          },
+          "x2": {
+            "field": "x1"
+          },
+          "y2": {
+            "field": "y1"
+          },
+          "fill": {
+            "signal": "datum.category === 'Gaming' ? '#eb6834' : '#2a78d6'"
+          },
+          "stroke": {
+            "signal": "datum.channel === creator ? '#0b0b0b' : '#fcfcfb'"
+          },
+          "strokeWidth": {
+            "signal": "datum.channel === creator ? 3 : 1"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          },
+          "tooltip": {
+            "signal": "{'Channel': datum.channel, 'Based in': replace(datum.city, ' (shown at Cairns)', ''), 'Main category': datum.category, 'Subscribers': format(datum.subscribers, ',')}"
+          }
+        },
+        "hover": {
+          "stroke": {
+            "value": "#0b0b0b"
+          },
+          "strokeWidth": {
+            "value": 2
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "description": "Channel name in each rectangle.",
+      "from": {
+        "data": "state_leaves"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.x0 + 8"
+          },
+          "y": {
+            "signal": "datum.y0 + 20"
+          },
+          "text": {
+            "signal": "(datum.x1 - datum.x0) > 70 && (datum.y1 - datum.y0) > 26 ? datum.channel : ''"
+          },
+          "limit": {
+            "signal": "datum.x1 - datum.x0 - 14"
+          },
+          "fontSize": {
+            "value": 13
+          },
+          "fontWeight": {
+            "value": "bold"
+          },
+          "fill": {
+            "value": "#ffffff"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "description": "Subscribers, category and city under each name, when the rectangle is big enough.",
+      "from": {
+        "data": "state_leaves"
+      },
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum.x0 + 8"
+          },
+          "y": {
+            "signal": "datum.y0 + 37"
+          },
+          "text": {
+            "signal": "(datum.x1 - datum.x0) > 70 && (datum.y1 - datum.y0) > 70 ? [replace(format(datum.subscribers, '.3~s'), 'G', 'B') + ' subscribers', datum.category, replace(datum.city, ' (shown at Cairns)', '')] : ''"
+          },
+          "lineHeight": {
+            "value": 16
+          },
+          "limit": {
+            "signal": "datum.x1 - datum.x0 - 14"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "fill": {
+            "value": "#ffffff"
+          },
+          "opacity": {
+            "signal": "s_prog"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "name": "header",
+      "description": "Instruction line at the top; in the Australia and state views it is the link back up one level.",
+      "encode": {
+        "update": {
+          "x": {
+            "value": 0
+          },
+          "y": {
+            "value": 12
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "text": {
+            "signal": "level === 'world' ? 'Click Australia (outlined in orange) to zoom in' : level === 'australia' ? '← Back to the world   ·   Click a state (or the ACT square) to see the top creators based there' : '← Back to Australia   ·   ' + picked_state + ': ' + (length(data('state_summary')) && data('state_summary')[0].n > 0 ? data('state_summary')[0].n + ' of the top 40 creators, ' + format(data('state_summary')[0].subs / data('top40_total')[0].subs, '.0%') + ' of their combined subscribers' : 'no documented top-40 creators')"
+          },
+          "fill": {
+            "signal": "level === 'world' ? '#52514e' : '#a8431b'"
+          },
+          "fontWeight": {
+            "signal": "level === 'world' ? 'normal' : 'bold'"
+          },
+          "cursor": {
+            "signal": "level === 'world' ? 'default' : 'pointer'"
+          }
+        }
+      }
+    }
+  ]
+}

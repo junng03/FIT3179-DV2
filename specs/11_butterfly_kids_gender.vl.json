@@ -144,7 +144,7 @@
           },
           "axis": {
             "title": {
-              "expr": "view_mode === 'Side by side' ? (width < 500 ? 'Share who watch (%)' : 'Share of boys / girls aged 6-13 who watch YouTube (%)') : (width < 500 ? 'Girls minus boys (points)' : 'Difference, girls minus boys (percentage points)')"
+              "expr": "view_mode === 'Side by side' ? (width < 500 ? 'Share who watch (%)' : 'Share of boys / girls aged 6-13 who watch YouTube (%)') : (width < 500 ? 'Girls minus boys (points)' : 'Gap between girls and boys (percentage points)')"
             },
             "labelExpr": "abs(datum.value)",
             "tickCount": {
@@ -342,6 +342,53 @@
             "value": "#2a78d6"
           },
           "value": "#8f6200"
+        }
+      }
+    },
+    {
+      "description": "Annotation: the category with the biggest lead for girls and for boys, found from the data (max and min of girls minus boys).",
+      "transform": [
+        {
+          "filter": "view_mode === 'Side by side' && datum.gender === 'girls'"
+        },
+        {
+          "joinaggregate": [
+            {
+              "op": "max",
+              "field": "gap",
+              "as": "max_gap"
+            },
+            {
+              "op": "min",
+              "field": "gap",
+              "as": "min_gap"
+            }
+          ]
+        },
+        {
+          "filter": "datum.gap === datum.max_gap || datum.gap === datum.min_gap"
+        },
+        {
+          "calculate": "datum.gap > 0 ? 'Biggest lead for girls: +' + datum.gap + ' pts' : 'Biggest lead for boys: ' + abs(datum.gap) + ' pts'",
+          "as": "gap_note"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 30,
+        "fontStyle": "italic",
+        "fontWeight": "bold",
+        "color": "#52514e"
+      },
+      "encoding": {
+        "x": {
+          "field": "signed",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "gap_note"
         }
       }
     }

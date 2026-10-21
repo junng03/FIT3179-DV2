@@ -8,7 +8,7 @@
   <!-- Use the device's real width so the layout adapts on phones instead of showing a shrunk desktop page -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Made for the Feed: Australia's YouTube Creators</title>
-  <meta name="description" content="A data story about Australia's YouTube creators: how audiences moved online, who the biggest creators are, where their fans are, what children watch, and how the under-16 law changed things.">
+  <meta name="description" content="A data story about Australia's YouTube creators: how audiences moved online, who the biggest creators are, where they're searched for most, what children watch, and how the under-16 law changed things.">
   <meta name="author" content="Jun Hao Ng">
   <!-- Fonts: Bricolage Grotesque for headings, Atkinson Hyperlegible (designed for legibility) for text and charts.
        "preconnect" opens the connection to Google Fonts early so the text appears sooner. -->
@@ -27,22 +27,22 @@
   <div class="wrap">
     <p class="kicker">Australian YouTube creators &middot; 2020&ndash;2026</p>
     <h1>Made for the feed</h1>
-    <p class="dek">Australians now spend their screen time with people who film from their bedrooms, cars and backyards. This is the story of how the audience moved, who the creators are, where their fans live, what children watch, and how a new law redrew the line.</p>
+    <p class="dek">Between 2020 and 2026, more of Australians' screen time went to people who film from their bedrooms, cars and backyards. This is the story of how the audience moved, who the creators are, where they're searched for most, what children watch, and how a new law redrew the line.</p>
     <p class="byline">By <span class="author">Jun Hao Ng</span> &middot; FIT3179 Data Visualisation 2 &middot; <time datetime="2026-10">October 2026</time></p>
 
     <!-- Stat strip: four headline numbers that preview the story. Each one links to its source (the <sup> numbers). -->
     <ul class="stat-strip" aria-label="Key figures">
       <li class="stat">
         <span class="stat-value">91%</span>
-        <span class="stat-label">of Australian adults used an online service to watch video in a given week in 2025<sup><a href="#src-1">1</a></sup></span>
+        <span class="stat-label">of Australian adults used an online service to watch video in a typical week, in the ACMA survey for the year to June 2025<sup><a href="#src-1">1</a></sup></span>
       </li>
       <li class="stat">
         <span class="stat-value">89%</span>
-        <span class="stat-label">of Australian children aged 6&ndash;13 watch YouTube, about 2.5 million children<sup><a href="#src-7">7</a></sup></span>
+        <span class="stat-label">of Australian children aged 6&ndash;13 watched YouTube when surveyed between April and December 2025, about 2.5 million children<sup><a href="#src-7">7</a></sup></span>
       </li>
       <li class="stat">
         <span class="stat-value">43%</span>
-        <span class="stat-label">of Australian news consumers get news from creators and influencers<sup><a href="#src-3">3</a></sup></span>
+        <span class="stat-label">of Australian news consumers got news from creators and influencers, in the 2026 Digital News Report<sup><a href="#src-3">3</a></sup></span>
       </li>
       <li class="stat">
         <span class="stat-value">4.7M</span>
@@ -58,7 +58,7 @@
       <li><span class="swatch swatch-ramp" aria-hidden="true"></span><span><strong>Blue</strong> is the data; darker blue means more</span></li>
       <li><span class="swatch" style="--c: var(--amber)" aria-hidden="true"></span><span><strong>Amber</strong> is the second group when two are compared</span></li>
       <li><span class="swatch" style="--c: var(--context)" aria-hidden="true"></span><span><strong>Grey</strong> is context, or no data</span></li>
-      <li><span class="try-it-label">Try it</span><span>under a chart's title tells you how to explore it</span></li>
+      <li><span class="try-it-label">Try it</span><span>under a chart's title means you can click or hover on the chart itself</span></li>
     </ul>
   </div>
 </header>
@@ -74,12 +74,12 @@
       <p class="act-num">Part 1</p>
       <h2 id="act-1-title">The audience moved</h2>
       <div class="prose">
-        <p>Nine in ten Australian adults now watch video online every week.<sup><a href="#src-1">1</a></sup> Paid streaming services such as Netflix are still the most popular way to watch, used by 68% of adults in 2025.<sup><a href="#src-2">2</a></sup> But no single service reaches more adults than YouTube: 70% used it over six months, and 56% in the past week.<sup><a href="#src-1">1</a></sup></p>
-        <p>The ranking below follows the eight most-used online video services each year. YouTube, in orange, overtook Netflix in 2023 and has stayed on top since.</p>
+        <p>In the ACMA's survey for the year to June 2025, nine in ten Australian adults watched video online in a typical week.<sup><a href="#src-1">1</a></sup> Paid streaming services such as Netflix were the most popular way to watch, used by 68% of adults.<sup><a href="#src-2">2</a></sup> But no single service reached more adults than YouTube: 70% had used it in the six months before they were surveyed, and 56% in the seven days before.<sup><a href="#src-1">1</a></sup></p>
+        <p>The ranking below follows the eight most-used online video services each year. YouTube, in orange, overtook Netflix in 2023 and stayed on top through 2025, the latest survey year.</p>
       </div>
 
       <!-- CHART CARD: every chart on the page uses this same pattern.
-           data-spec      the chart spec main.js loads and draws (Vega-Lite JSON; the treemap is Vega)
+           data-spec      the chart spec main.js loads and draws (Vega-Lite JSON; the treemap and drill-down map are Vega)
            data-requires  the data files main.js checks first; if one is missing it shows a "Data pending" card
            data-idiom, data-columns, data-source  describe the chart; shown on the "Data pending" card if needed
            figcaption     title (h3), how to read the chart, and a "Try it" line for the interaction
@@ -92,16 +92,15 @@
         data-columns="year, service, pct, source"
         data-source="ACMA, How we watch and listen to content (2026), data tables QF8 (run scripts/clean_acma.py)">
         <figcaption>
-          <h3>Online video services Australians used in the past week, ranked each year</h3>
-          <p class="how-to-read">Each line is one service. Rank 1 means more adults used it in the past seven days than any other service that year. Hover a point for the exact share.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Pick another service to highlight it, or switch to <em>Share of adults</em> to see how close the race is.</p>
+          <h3>Online video services Australians used in a week, ranked each year, 2020&ndash;2025</h3>
+          <p class="how-to-read">Each line is one service. Rank 1 means more adults used it in the seven days before they were surveyed than any other service that year. Hover a point for the exact share.</p>
         </figcaption>
         <div class="chart-mount"></div>
-        <p class="chart-source">Source: ACMA, <em>How we watch and listen to content</em>, 2026, data tables (question QF8, adults 18+)<sup><a href="#src-1">1</a></sup>. The chart starts in 2020 because the 2019 survey listed different services. Instagram Reels was first asked about in 2021.</p>
+        <p class="chart-source">Source: ACMA, <em>How we watch and listen to content</em>, 2026, data tables (question QF8, adults 18+), survey years 2020 to 2025; the 2025 survey ran to June 2025<sup><a href="#src-1">1</a></sup>. The chart starts in 2020 because the 2019 survey listed different services. Instagram Reels was first asked about in 2021.</p>
       </figure>
 
       <div class="prose">
-        <p>Not every kind of online video kept growing, though. The share of adults watching user-generated or short-form video in a given week fell from 59% in 2024 to 52% in 2025. The drop was steepest among the youngest adults: 77% of 18&ndash;24 year olds watched in 2024, but only 62% in 2025.<sup><a href="#src-1">1</a></sup></p>
+        <p>Not every kind of online video kept growing, though. Between the 2024 and 2025 surveys, the share of adults who had watched user-generated or short-form video in the previous seven days fell from 59% to 52%. The drop was steepest among the youngest adults: from 77% of 18&ndash;24 year olds to 62%.<sup><a href="#src-1">1</a></sup></p>
       </div>
 
       <figure class="chart-card" id="chart-2"
@@ -111,26 +110,25 @@
         data-columns="age_group, year, pct, source"
         data-source="ACMA, How we watch and listen to content (2026), data tables QF4 by age (run scripts/clean_acma.py)">
         <figcaption>
-          <h3>Who watched short and user-made video in the past week, 2024 vs 2025</h3>
-          <p class="how-to-read">Grey dots show 2024, orange dots show 2025. A longer line means a bigger change. "User-generated or short-form" means services such as YouTube, TikTok and Instagram.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Order the age groups by <em>Biggest drop</em> to see which changed most.</p>
+          <h3>Who watched short and user-made video in a week, 2024 vs 2025 surveys</h3>
+          <p class="how-to-read">Each line runs from the 2024 survey (grey) down to the 2025 survey (orange), with the change beside it in percentage points (pts), the gap between the two percentages: a fall from 60% to 54% is 6 pts. A longer line means a bigger drop. "User-generated or short-form" means services such as YouTube, TikTok and Instagram.</p>
         </figcaption>
         <div class="chart-mount"></div>
-        <p class="chart-source">Source: ACMA, <em>How we watch and listen to content</em>, 2026, data tables (question QF4, adults 18+)<sup><a href="#src-1">1</a></sup></p>
+        <p class="chart-source">Source: ACMA, <em>How we watch and listen to content</em>, 2026, data tables (question QF4, adults 18+), 2024 and 2025 surveys; the 2025 survey ran to June 2025<sup><a href="#src-1">1</a></sup></p>
       </figure>
     </div>
   </section>
 
   <!-- ===================== ACT 2 =====================
        Meet the creators: what the top 40 make (treemap), how long their videos are, and where they live.
-       Ends on the map so "where creators live" leads into Act 3, "where their fans are". Charts 3-6. -->
+       Ends on the map so "where creators live" leads into Act 3, "where they're searched most". Charts 3-6. -->
   <section class="act" id="act-2" aria-labelledby="act-2-title">
     <div class="wrap">
       <p class="act-num">Part 2</p>
       <h2 id="act-2-title">Meet the creators</h2>
       <div class="prose">
-        <p>So who makes the videos? Ranking sites disagree about who counts as an "Australian creator", so this story uses one rule: an independent channel that lists Australia as its home country on YouTube. TV networks and other broadcasters are left out. That gives the 40 largest creators below, one channel per creator.<sup><a href="#src-4">4</a>,<a href="#src-5">5</a></sup></p>
-        <p>Gaming dominates. Thirteen of the 40 mainly post gaming videos, and together they hold 41% of all the subscribers on this list, so gaming is the category picked out in orange.<sup><a href="#src-4">4</a></sup></p>
+        <p>So who makes the videos? Ranking sites disagree about who counts as an "Australian creator", so this story uses one rule: an independent channel that lists Australia as its home country on YouTube. TV networks and other broadcasters are left out. That gives the 40 largest creators below, by subscribers on 10 October 2026, one channel per creator.<sup><a href="#src-4">4</a>,<a href="#src-5">5</a></sup></p>
+        <p>Gaming dominated. On 10 October 2026, thirteen of the 40 mainly posted gaming videos, and together they held 41% of all the subscribers on this list, so gaming is the category picked out in orange.<sup><a href="#src-4">4</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-3"
@@ -141,7 +139,7 @@
         data-source="YouTube Data API v3: main category = the category used most often across each channel's 50 most recent uploads">
         <figcaption>
           <h3>What the top 40 channels make</h3>
-          <p class="how-to-read">Each rectangle is one channel, grouped by the YouTube category it uses most. Bigger rectangles have more subscribers. Gaming channels are orange; every other category is blue.</p>
+          <p class="how-to-read">Each rectangle is one channel, grouped by the YouTube category it uses most; each category is outlined. Bigger rectangles have more subscribers. Gaming channels are orange; every other category is blue.</p>
           <p class="try-it"><span class="try-it-label">Try it</span>Click a category to zoom in and see every channel in it; click again to zoom out. Switch to <em>Total views</em> to size channels by how much they have been watched.</p>
         </figcaption>
         <div class="chart-mount"></div>
@@ -149,8 +147,8 @@
       </figure>
 
       <div class="prose">
-        <p>The way they make videos has split in two: Shorts of a minute or so for the phone feed, and longer videos for the TV screen. Almost half (48%) of these creators' recent uploads run three minutes or less. Gaming and science channels still make long videos, typically 10 and 15 minutes. Vlog, animation and comedy channels lean hard into Shorts.<sup><a href="#src-4">4</a></sup></p>
-        <p>Short doesn't mean more watched, though. The longer videos have a median of 284,000 views each, against 165,000 for Shorts. And not one of these 1,999 videos is marked "made for kids" on YouTube. That label matters in Part 4.<sup><a href="#src-4">4</a></sup></p>
+        <p>By October 2026, the way they made videos had split in two: Shorts of a minute or so for the phone feed, and longer videos for the TV screen. Of each creator's 50 most recent uploads as of 10 October 2026, almost half (48%) ran three minutes or less. Gaming and science channels mostly made long videos, typically 10 and 15 minutes. Vlog, animation and comedy channels leaned hard into Shorts.<sup><a href="#src-4">4</a></sup></p>
+        <p>Short didn't mean more watched, though. By 17 October 2026, the longer videos had a median of about 285,000 views each, against 165,000 for Shorts. And not one of these 1,999 videos was marked "made for kids" on YouTube. That label matters in Part 4.<sup><a href="#src-4">4</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-4"
@@ -162,14 +160,14 @@
         <figcaption>
           <h3>Their videos by category: length, views and likes</h3>
           <p class="how-to-read">Each dot is one video. Orange dots are three minutes or shorter, which is the most a YouTube Short can be. The black line marks the middle (median): half the videos are below it and half above. The scale is stretched so very small and very large values both fit.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Switch <em>Show</em> to see each video's views or likes instead of its length, and <em>Sort categories by</em> to reorder the categories, for example length sorted by median views. Pick a creator to highlight their videos, or click <em>Short</em> or <em>Longer video</em> in the legend to show only that kind; double-click to show both.</p>
+          <p class="try-it"><span class="try-it-label">Try it</span>Move the mouse over the chart: the nearest video is circled and its channel, length, views and likes appear above the chart. Click <em>Short</em> or <em>Longer video</em> in the legend to show only that kind; double-click to show both.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Source: YouTube Data API v3<sup><a href="#src-4">4</a></sup>, retrieved 10 October 2026. Views and likes retrieved 17 October 2026; they are running totals, so older uploads have had longer to collect them (826 of the 1,999 videos are from before 2026). Some categories are mostly one channel: Sports is How Ridiculous and People &amp; Blogs is Bridey Drake. YouTube's public data has no "Short" label, so videos of 3 minutes or less are counted as likely Shorts. Categories with fewer than 20 videos are left out.</p>
       </figure>
 
       <div class="prose">
-        <p>Where do these creators work from? Only 12 of the 40 have a publicly documented home city, and eight of those 12 live in Brisbane, Sydney or Melbourne. The exception is the biggest channel of all: How Ridiculous films in Perth.<sup><a href="#src-4">4</a>,<a href="#src-5">5</a></sup></p>
+        <p>Where do these creators work from? As of October 2026, only 12 of the 40 had a publicly documented home city, and eight of those 12 lived in Brisbane, Sydney or Melbourne. The exception was the biggest channel of all: How Ridiculous, based in Perth.<sup><a href="#src-4">4</a>,<a href="#src-5">5</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-5-6"
@@ -180,8 +178,8 @@
         data-source="YouTube Data API v3 (run scripts/build_creators.py); home cities from data/creator_cities.csv, each with a source">
         <figcaption>
           <h3>Where Australia's biggest creators are based</h3>
-          <p class="how-to-read">Each circle is a city; its area shows the combined subscribers of the creators based there. The bars rank the 15 largest channels by the same measure. Grey bars are creators whose home city isn't publicly documented, so they aren't on the map.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Click a city or a bar to pick out that city's creators in both views; double-click to clear. Change the measure to rank channels by total views or videos uploaded.</p>
+          <p class="how-to-read">Each circle is a city; its area shows the combined subscribers of the creators based there. The bars rank the 15 largest channels by subscribers. Grey bars are creators whose home city isn't publicly documented, so they aren't on the map.</p>
+          <p class="try-it"><span class="try-it-label">Try it</span>Click a city or a bar to pick out that city's creators in both views; double-click to clear.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Source: YouTube Data API v3<sup><a href="#src-4">4</a></sup>, retrieved 10 October 2026; creator list and home cities from Wikipedia, Wikidata and news reports<sup><a href="#src-5">5</a></sup>; state boundaries<sup><a href="#src-11">11</a></sup>. Subscriber counts are rounded by YouTube. Primitive Technology is based in Far North Queensland and shown at Cairns.</p>
@@ -190,14 +188,15 @@
   </section>
 
   <!-- ===================== ACT 3 =====================
-       Where the fans are: Google Trends search interest by state (tile maps) and by country (world map). Charts 7-8. -->
+       Where they're searched most: Google Trends search interest by state (tile maps), then a drill-down from the world to Australia's states
+       to a treemap of each state's creators. Charts 7-8. -->
   <section class="act" id="act-3" aria-labelledby="act-3-title">
     <div class="wrap">
       <p class="act-num">Part 3</p>
-      <h2 id="act-3-title">Where the fans are</h2>
+      <h2 id="act-3-title">Where they're searched most</h2>
       <div class="prose">
-        <p>The creators live in a few big cities. Do their fans? YouTube doesn't publish where a channel's viewers live, but Google Trends shows where people search YouTube for a creator. It scores each place from 0 to 100, where 100 is the place where that creator takes up the biggest share of searches. It measures relative interest, not the number of viewers.<sup><a href="#src-6">6</a></sup></p>
-        <p>Four of the biggest creators are compared below, and home is not where they are searched for most. How Ridiculous (Perth) and Lachlan (Brisbane) come second in their home states, and Bridey Drake (Central Coast) fifth in New South Wales. The top spot goes to a small state or territory every time: Tasmania for How Ridiculous and LazarBeam, the ACT for Lachlan and Bridey Drake.<sup><a href="#src-6">6</a></sup></p>
+        <p>The creators live in a few big cities. Where are they searched for most? YouTube doesn't publish where a channel's viewers live, but Google Trends shows where people searched YouTube for a creator, here over the 12 months to 11 October 2026. It scores each place from 0 to 100, where 100 is the place where that creator took up the biggest share of searches. Because each score is a share of that place's own searching, a small state can top the list on far fewer searches than a big one: it shows where a creator is most popular relative to everything else people search for, not where most of their viewers are.<sup><a href="#src-6">6</a></sup></p>
+        <p>Four of the biggest creators are compared below, and home was not where they were searched for most. How Ridiculous (Perth) and Lachlan (Brisbane) came second in their home states, and Bridey Drake (Central Coast) fifth in New South Wales. The top spot went to a small state or territory every time: Tasmania for How Ridiculous and LazarBeam, the ACT for Lachlan and Bridey Drake.<sup><a href="#src-6">6</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-7"
@@ -207,31 +206,30 @@
         data-columns="creator, state, interest, note, topic_id, fetched"
         data-source="Google Trends, YouTube Search, Australia, past 12 months, interest by state, one creator per query (scripts/fetch_trends.py)">
         <figcaption>
-          <h3>Each creator's home crowd, by state</h3>
-          <p class="how-to-read">Each square is one state or territory, drawn the same size so the ACT is as easy to see as WA. Darker squares searched for that creator more, relative to all their other searching. Grey squares had too little searching to score.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Hover a state to outline it in all four maps and compare the creators.</p>
+          <h3>Where each creator is searched most, relative to each state's own searching</h3>
+          <p class="how-to-read">Each square is one state or territory, drawn the same size so the ACT is as easy to see as WA. The darker the square, the bigger the share of that state's YouTube searches that went to the creator. Grey squares had too little searching to score.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Source: Google Trends, YouTube Search, 12 months to 11 October 2026<sup><a href="#src-6">6</a></sup>. Each creator is searched as a Google "topic", so "Lachlan" means Lachlan Power, not everyone called Lachlan. Each creator is scored separately, so compare the pattern within a map, not the shades between maps. Small states can score high on fewer searches, because the score is relative to each state's total searching.</p>
       </figure>
 
       <div class="prose">
-        <p>Beyond Australia, all four creators follow the same pattern: Australia first, New Zealand second, then mostly the United Kingdom, Ireland, the Nordic countries and North America.<sup><a href="#src-6">6</a></sup></p>
+        <p>Beyond Australia, all four creators followed the same pattern over those 12 months: Australia first, New Zealand second, then mostly the United Kingdom, Ireland, the Nordic countries and North America.<sup><a href="#src-6">6</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-8"
-        data-spec="specs/08_world_search_interest.vl.json"
-        data-requires="data/trends_world.csv"
-        data-idiom="Choropleth map (world)"
-        data-columns="creator, country, iso_n3, interest, topic_id, fetched"
-        data-source="Google Trends, YouTube Search, worldwide, past 12 months, interest by country (scripts/fetch_trends.py). iso_n3 = ISO 3166 numeric code">
+        data-spec="specs/08_drilldown_map.vg.json"
+        data-requires="data/trends_world.csv, data/trends_state.csv, data/state_tiles.csv, data/creators.csv, data/city_states.csv"
+        data-idiom="Drill-down (Vega): world choropleth, then state choropleth, then a treemap of each state's creators"
+        data-columns="trends_world: creator, country, iso_n3, interest; trends_state: creator, state, interest; creators: channel, category, subscribers, city; city_states: city, state"
+        data-source="Google Trends, YouTube Search, past 12 months, by country and by state (scripts/fetch_trends.py); YouTube Data API v3; creator home cities from data/creator_cities.csv">
         <figcaption>
-          <h3>Where in the world people search for Australian creators</h3>
-          <p class="how-to-read">The map starts with all four creators combined: each country's score is the average of the four creators' scores, where a creator with too few searches there counts as 0. Darker countries search for them more, relative to all their other searching. Australia is outlined in orange. Grey countries had too little search volume to score for any of the four.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Pick one creator from the menu to see their map alone, then switch to <em>Asia-Pacific</em> to zoom in on Australia's neighbours. Hover a country to see each creator's score.</p>
+          <h3>From the world, to Australia, to each state's creators</h3>
+          <p class="how-to-read">Three levels, one click apart. The world map and the state map are coloured by search interest: the darker the place, the bigger the share of its YouTube searches that went to the chosen creators. It is a share of each place's searches, not a share of the creators' audience. Grey places had too little search volume to score. The map shows one creator at a time, starting with How Ridiculous. Clicking a state opens a treemap of the top-40 creators based there, sized by subscribers, with gaming channels in orange as in the treemap above.</p>
+          <p class="try-it"><span class="try-it-label">Try it</span>Click Australia to zoom in, then click a state (or the ACT square) to see its creators. Pick a creator from the menu to recolour both maps and outline them in their state's treemap. Click <em>Back</em> or double-click to go up a level.</p>
         </figcaption>
         <div class="chart-mount"></div>
-        <p class="chart-source">Source: Google Trends, YouTube Search, 12 months to 11 October 2026<sup><a href="#src-6">6</a></sup>; country boundaries: Natural Earth<sup><a href="#src-12">12</a></sup>. Equal Earth projection. Small countries can score high on little searching, because the score is relative to each country's total searches.</p>
+        <p class="chart-source">Source: Google Trends, YouTube Search, 12 months to 11 October 2026<sup><a href="#src-6">6</a></sup>; subscribers from the YouTube Data API<sup><a href="#src-4">4</a></sup>; home cities from Wikipedia, Wikidata and news reports<sup><a href="#src-5">5</a></sup>; country boundaries: Natural Earth<sup><a href="#src-12">12</a></sup>; state boundaries<sup><a href="#src-11">11</a></sup>. Equal Earth projection, centred on Australia when zoomed in. Only 12 of the 40 creators have a publicly documented home city, so each state's treemap shows only those, and the ACT, Northern Territory and Tasmania have none. Small places can score high on little searching, because each score is relative to that place's total searches. Hong Kong, the Maldives, Mauritius and Singapore are too small for this world map.</p>
       </figure>
     </div>
   </section>
@@ -243,7 +241,7 @@
       <p class="act-num">Part 4</p>
       <h2 id="act-4-title">Made for kids?</h2>
       <div class="prose">
-        <p>Children are among YouTube's biggest audiences. A Roy Morgan survey of 1,129 children aged 6 to 13 found that 89% watch YouTube, about 2.5 million children. That includes 84% of 6&ndash;7 year olds and 91% of children aged 8 and over.<sup><a href="#src-7">7</a></sup></p>
+        <p>Search data shows where creators are popular, but not who is watching. One audience that has been measured directly is children, and they were among YouTube's biggest. A Roy Morgan survey of 1,129 children aged 6 to 13, run between April and December 2025, found that 89% watched YouTube, about 2.5 million children. That included 84% of 6&ndash;7 year olds and 91% of children aged 8 and over.<sup><a href="#src-7">7</a></sup></p>
       </div>
 
       <figure class="chart-card" id="chart-9"
@@ -253,9 +251,8 @@
         data-columns="age_group, group, order, pct, source"
         data-source="Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025, n = 1,129">
         <figcaption>
-          <h3>How many Australian children watch YouTube</h3>
-          <p class="how-to-read">Each square is one child out of 100. Blue squares watch YouTube; grey squares don't.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Switch the age group to compare younger and older children.</p>
+          <h3>How many Australian children watched YouTube, April&ndash;December 2025</h3>
+          <p class="how-to-read">Each square is one child out of 100. Blue squares watched YouTube; grey squares didn't.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="annotation"><strong>One channel stands out.</strong> Asked for a single favourite channel, 15.2% of these children named MrBeast, an American creator. The next nine channels got about 1% each.<sup><a href="#src-7">7</a></sup></p>
@@ -263,7 +260,7 @@
       </figure>
 
       <div class="prose">
-        <p>What children watch changes as they grow up, but gaming stays on top. It is the most-watched category at every age, watched by 53% of young viewers, and it is the same category that dominates the top 40 creators in Part 2, none of whose recent videos are marked "made for kids". Younger children add animation and animal videos; by 10 to 13, comedy moves into second place.<sup><a href="#src-4">4</a>,<a href="#src-7">7</a></sup></p>
+        <p>What children watched differed by age, but gaming stayed on top. In the 2025 survey it was the most-watched category at every age, watched by 53% of young viewers. It is also the category that dominated the top 40 creators in Part 2, none of whose 50 most recent videos (as of October 2026) were marked "made for kids". Children aged 6 to 9 also watched a lot of animation and animal videos; among 10 to 13 year olds, comedy came second.<sup><a href="#src-4">4</a>,<a href="#src-7">7</a></sup></p>
       </div>
 
       <figure class="chart-card" id="chart-10"
@@ -273,16 +270,15 @@
         data-columns="age_band, category, pct, note, source"
         data-source="Roy Morgan (2026), YouTube for Young Australians: top categories for ages 6-9 and 10-13, and all categories for 6-13">
         <figcaption>
-          <h3>What children watch as they grow up</h3>
+          <h3>What children watched, by age group, 2025 survey</h3>
           <p class="how-to-read">Rows are the five most-watched video categories; columns are age groups. Darker cells mean a larger share of YouTube-watching children in that group watch the category. Gaming is the top category for both age groups, but Roy Morgan didn't publish its exact share by age. Grey cells weren't published.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Hover a category to outline its row and read across the age groups.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Source: Roy Morgan, <em>YouTube for Young Australians</em>, February 2026<sup><a href="#src-7">7</a></sup>. Roy Morgan published only the top categories for each age group, plus all categories for 6&ndash;13 year olds.</p>
       </figure>
 
       <div class="prose">
-        <p>Boys and girls watch differently. Boys drive gaming and sport. Girls lead on animals, music, fashion, DIY, unboxing and cooking. Comedy, animation and challenge videos, the MrBeast style, appeal to both almost equally.<sup><a href="#src-7">7</a></sup></p>
+        <p>Boys and girls watched differently in 2025. Boys drove gaming and sport. Girls led on animals, music, fashion, DIY, unboxing and cooking. Comedy, animation and challenge videos, the MrBeast style, appealed to both almost equally.<sup><a href="#src-7">7</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-11"
@@ -292,9 +288,8 @@
         data-columns="category, boys, girls, source"
         data-source="Roy Morgan (2026), YouTube for Young Australians, Apr-Dec 2025; base: boys / girls aged 6-13 who watch YouTube">
         <figcaption>
-          <h3>Boys and girls aged 6&ndash;13: what they watch on YouTube</h3>
-          <p class="how-to-read">Blue bars to the left are boys, amber bars to the right are girls. Each number is the share of boys (or girls) who watch YouTube that watch that kind of video. In the starting order, categories at the top lean towards boys and those at the bottom lean towards girls.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Switch to <em>Difference</em> for one bar per category showing the gap in percentage points, or change the sort order.</p>
+          <h3>Boys and girls aged 6&ndash;13: what they watched on YouTube, 2025 survey</h3>
+          <p class="how-to-read">Blue bars to the left are boys, amber bars to the right are girls. Each number is the share of boys (or girls) who watch YouTube that watch that kind of video. In the starting order, categories at the top lean towards boys and those at the bottom lean towards girls. Switch to <em>Difference</em> to see one bar per category: the gap between girls and boys in percentage points (pts), so +26 means 26 more girls in every 100 watched it than boys.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Source: Roy Morgan, <em>YouTube for Young Australians</em>, February 2026<sup><a href="#src-7">7</a></sup>. Base: children aged 6&ndash;13 who watch YouTube.</p>
@@ -326,18 +321,18 @@
           </ul>
         </div>
         <div class="ba-col ba-kept">
-          <h3>What they can still do</h3>
+          <h3>What they could still do, as at February 2026</h3>
           <ul>
             <li><span class="ba-icon" aria-hidden="true">&#10003;</span> Watch YouTube while logged out</li>
-            <li><span class="ba-icon" aria-hidden="true">&#10003;</span> Use YouTube Kids, which is outside the law's scope</li>
+            <li><span class="ba-icon" aria-hidden="true">&#10003;</span> Use YouTube Kids, which was outside the law's scope</li>
           </ul>
-          <p class="ba-note">Logged-out viewing has none of the safeguards that apply to a signed-in child's account.</p>
+          <p class="ba-note">Logged-out viewing had none of the safeguards that apply to a signed-in child's account.</p>
         </div>
         <p class="chart-source">Sources: ChannelNews, December 2025<sup><a href="#src-9">9</a></sup>; Roy Morgan, February 2026<sup><a href="#src-7">7</a></sup></p>
       </div>
 
       <div class="prose">
-        <p>Put together, two years changed what it means to be a creator in Australia: a new law, fewer young viewers with accounts, and a bigger role in how adults get their news.<sup><a href="#src-3">3</a></sup></p>
+        <p>Put together, the two years from November 2024 to September 2026 changed what it meant to be a creator in Australia: a new law, fewer young viewers with accounts, and a bigger role in how adults get their news.<sup><a href="#src-3">3</a></sup></p>
       </div>
 
       <figure class="chart-card wide" id="chart-12"
@@ -347,9 +342,8 @@
         data-columns="date, when, event, label, type, lane, anchor, source"
         data-source="Event dates from eSafety, ACMA, University of Canberra and IAB Australia publications">
         <figcaption>
-          <h3>Two years that reshaped creators' audiences</h3>
+          <h3>Two years that reshaped creators' audiences, November 2024 to September 2026</h3>
           <p class="how-to-read">Each marker is one event: policy in orange, research in blue, industry in grey. Research and industry events are placed on the date the report was released. Hover a marker for the date and source.</p>
-          <p class="try-it"><span class="try-it-label">Try it</span>Click an event type in the legend to show only those events; double-click to show all.</p>
         </figcaption>
         <div class="chart-mount"></div>
         <p class="chart-source">Sources: eSafety<sup><a href="#src-8">8</a></sup>; ACMA<sup><a href="#src-1">1</a></sup>; University of Canberra<sup><a href="#src-3">3</a></sup>; IAB Australia<sup><a href="#src-10">10</a></sup></p>
@@ -357,7 +351,7 @@
 
       <!-- Closing line: ties the five parts together in one sentence -->
       <div class="prose closing">
-        <p><strong>The story in one line.</strong> Australian adults moved to YouTube; its biggest local creators answered with gaming and Shorts; their fans spread from Tasmania to New Zealand; and children love the same gaming videos, none of them marked as made for kids. The under-16 law changed who can hold an account, not who can press play.</p>
+        <p><strong>The story in one line.</strong> Between 2020 and 2025, Australian adults moved to YouTube; by October 2026, its biggest local creators had answered with gaming and Shorts; they took the biggest share of searching in small places like Tasmania and the ACT, and in New Zealand; and in 2025, children loved the same gaming videos, none of them marked as made for kids. The under-16 law changed who could hold an account, not who could press play.</p>
       </div>
     </div>
   </section>
@@ -370,7 +364,7 @@
       <div class="about-grid">
         <div>
           <h3>Why</h3>
-          <p>Creators now compete with television for Australians' attention, and children are among their biggest audiences, yet most people never see the numbers behind that shift. This page brings them together in one story.</p>
+          <p>By 2025, creators were competing with television for Australians' attention, and children were among their biggest audiences, yet most people never see the numbers behind that shift. This page brings them together in one story.</p>
         </div>
         <div>
           <h3>Who</h3>
@@ -412,7 +406,7 @@
 <footer class="site-footer">
   <div class="wrap">
     <p><strong>Author:</strong> <span class="author">Jun Hao Ng</span>, Monash University (FIT3179), October 2026.</p>
-    <p><strong>Built with:</strong> <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> and <a href="https://vega.github.io/vega/">Vega</a> (treemap). Every chart's specification is a readable JSON file in the <code>specs/</code> folder of this repository.</p>
+    <p><strong>Built with:</strong> <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> and <a href="https://vega.github.io/vega/">Vega</a> (treemap and drill-down map). Every chart's specification is a readable JSON file in the <code>specs/</code> folder of this repository.</p>
     <p><strong>Use of AI:</strong> Page structure, code, data-cleaning scripts and draft text were developed with assistance from Claude (Anthropic). All data comes from the sources listed above; no values were generated by AI.</p>
   </div>
 </footer>
